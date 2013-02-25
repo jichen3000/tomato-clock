@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tomato Clock</title>
+
+    <link rel="stylesheet" type="text/css" href="bootstrap.css">
+    <style type="text/css">
+    #content{
+        margin-left:auto;
+        margin-right:auto;
+        width: 200px;
+    }
+    #clock{
+/*        margin-left:auto;
+        margin-right:auto;
+*/        background: none;
+        /*padding: 10px;*/
+        height: 50px;
+    }
+    #control-group{
+/*        margin-left:auto;
+        margin-right:auto;
+*/        /*width: 180px;*/
+    }
+    .double-cell{
+        width: 50px;
+    }
+    .single-cell{
+        width: 25px;
+    }
+    .cell{
+        font-family: digital, arial, verdana;
+        text-align: center;
+        height: 50px;
+        font-size: 50px;
+        overflow: hidden;
+        position: relative;
+        float: left;
+        line-height: 50px;
+    }
+    .mili-second{
+        position: absolute;
+        top:  0;
+        left: 0;
+    }
+    .divider{
+        font-size: 40px;
+    }
+    @-webkit-keyframes moveten {
+        0% {top: 0;}
+        100% {top: -500px;} 
+    }
+    @-webkit-keyframes change-color {
+        0% {background: none;}
+        100% {background: red;} 
+    }
+
+    @font-face {
+        font-family: 'digital';
+        src: url('DS-DIGI.TTF');
+
+    }
+    </style>
+</head>
+<body>
+    <div class="test">
+        <p id="messages">msg</p>
+        <button id="test">test</button>
+    </div>
+    <div id="set-time-group">
+        <input type="text" id="stop-minutes" value="0002">
+        <button id="set">set</button>
+        <button id="set48">set 48 mins</button>
+        <button id="set25">set 25 mins</button>
+    </div>
+    <div id="content">
+        <div id="clock">
+            <div class="cell single-cell">
+                <div class="ten-minutes">0</div>
+            </div>
+            <div class="cell single-cell">
+                <div class="minutes">0</div>
+            </div>
+            <div class="cell single-cell"><div class="divider">:</div></div>
+            <div class="cell single-cell">
+                <div class="ten-seconds">0</div>
+            </div>
+            <div class="cell single-cell">
+                <div class="seconds">0</div>
+            </div>
+            <div class="cell single-cell"><div class="divider">:</div></div>
+            <div class="cell single-cell">
+                <div class="mili-second">0 9 8 7 6 5 4 3 2 1</div>
+            </div>
+        </div>
+        <div id="control-group">
+            <button id="start" class="btn btn-primary">start</button>
+            <button id="pause" class="btn btn-warning">pause</button>
+            <button id="clear" class="btn btn-danger">clear</button>
+        </div>
+    </div>
+</body>
+    <script src="jquery-1.7.2.min.js" type="text/javascript"></script>
+    <script src="main.js" type="text/javascript"></script>
+    <script src="bootstrap.min.js" type="text/javascript"></script>
+
+</html>
