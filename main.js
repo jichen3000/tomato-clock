@@ -101,9 +101,8 @@ $(function(){
         refreshStopTimeAndStatus(stopTime);
     }
     function getStopTimeFromURL () {
-        curUrl = document.URL;
-        if(curUrl.indexOf("#")>-1){
-            return getFullStopTime(curUrl.substring(curUrl.indexOf("#")+1, curUrl.length));
+        if(window.location.hash!=""){
+            return getFullStopTime(window.location.hash.substring(1));
         };
         return NONE;
     }
@@ -182,6 +181,11 @@ $(function(){
         curUrl = "file://localhost/Users/Colin/work/notes/codes/js/stopwatch/count_down.html#0010";
         window.history.pushState({"html":curUrl,"pageTitle":"123"},"", urlPath);
     });
+    if ("onhashchange" in window) { // does the browser support the hashchange event?
+        window.onhashchange = function () {
+            main();
+        }
+    }
     function main () {
         if (getStopTimeFromURL()!=NONE) {
             stopTime=getFullStopTime(getStopTimeFromURL());
