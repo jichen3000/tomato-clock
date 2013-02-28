@@ -155,13 +155,14 @@ $(function(){
         refreshStopTimeAndStatus(stopTime);
     });
     function changeURL (timeStr) {
-        var sharp = "#";
-        var nextURL = document.URL;
-        if (nextURL.indexOf(sharp) >0 ) {
-            nextURL = nextURL.substring(0,nextURL.indexOf(sharp));
-        };
-        nextURL += sharp+timeStr;
-        window.history.pushState({"html":document.URL,"pageTitle":document.pageTitle},"", nextURL);
+        window.location.hash="#"+timeStr;
+        // var sharp = "#";
+        // var nextURL = document.URL;
+        // if (nextURL.indexOf(sharp) >0 ) {
+        //     nextURL = nextURL.substring(0,nextURL.indexOf(sharp));
+        // };
+        // nextURL += sharp+timeStr;
+        // window.history.pushState({"html":document.URL,"pageTitle":document.pageTitle},"", nextURL);
     }
     function setStopTimeAndStatusAndURL (timeValue) {
         refreshStopTimeAndStatus(timeValue);
