@@ -50,6 +50,30 @@ function getMinutes(timeStr){
 function computerSeconds(timeStr){
     return parseInt(getMinutes(timeStr))*60+parseInt(getSeconds(timeStr));
 }
+function inRunning () {
+    $("button#start").hide();
+    $("button#pause").show();
+    $("button#clear").hide();
+
+    $("div#set-time-group").hide();
+    $("div#short-keys").hide();
+}
+function inStop () {
+    $("button#start").show();
+    $("button#pause").hide();
+    $("button#clear").show();
+
+    $("div#set-time-group").show();
+    $("div#short-keys").show();
+}
+function inPause () {
+    $("button#start").show();
+    $("button#pause").hide();
+    $("button#clear").show();
+
+    $("div#set-time-group").hide();
+    $("div#short-keys").hide();
+}
 function computerLeftTimeStr (timeStr,seconds) {
     var parseSeconds = seconds % 60;
     var parseMinutes = (seconds - parseSeconds) / 60;
@@ -146,13 +170,16 @@ $(function(){
     });
     $("button#start").click(function(){
         startCoundDown(stopTime);
+        inRunning();
     });
     $("button#pause").click(function(){
         setAnimationPlayState("paused");
+        inPause();
     });
     $("button#clear").click(function(){
         stopAlarmEvents();
         refreshStopTimeAndStatus(stopTime);
+        inStop();
     });
     function changeURL (timeStr) {
         window.location.hash="#"+timeStr;
@@ -192,6 +219,7 @@ $(function(){
             stopTime=getFullStopTime(getStopTimeFromURL());
         };
         refreshStopTimeAndStatus(stopTime);
+        inStop();
     }
     main();
 });
