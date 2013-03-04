@@ -1,6 +1,5 @@
 tomorrow:
-  ☐ adjust button logic
-  ☐ adjust whole interface
+  ☐ adjust button logic, status: stop(start, set time), running(pause), pase(start, clear)
   ☐ html5 offline store test
   ☐ create a server
   ☐ store user
@@ -10,4 +9,5 @@ tomorrow:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ adjust some divs representations. @done (13-03-02 20:17)
  ✔ adjust input of minutes @done (13-03-01 06:18)

@@ -6,13 +6,13 @@
     <link rel="stylesheet" type="text/css" href="bootstrap.css">
     <style type="text/css">
     #content{
-        margin-left:auto;
-        margin-right:auto;
         width: 200px;
     }
     #clock{
-        background: none;
         height: 50px;
+    }
+    .some-margin-bottom{
+        margin-bottom: 5px;
     }
     #control-group{
     }
@@ -44,6 +44,9 @@
     .divider{
         font-size: 40px;
     }
+    .test{
+        visibility: hidden;
+    }
     @-webkit-keyframes moveten {
         0% {top: 0;}
         100% {top: -500px;} 
@@ -60,8 +63,26 @@
     }
     </style>
 </head>
-<body>
-    <div id="content">
+<body data-spy="scroll">
+    <div class="navbar navbar-fixed-top navbar-inverse">
+      <div class="navbar-inner">
+        <div class="container">
+            <a class="brand" href="./main.html">Tomato Clock</a>
+        </div>
+      </div>
+    </div>
+    <div class="">
+      <div class="container">
+        <p>jsut for null.</p>
+      </div>
+    </div>  
+    <div class="">
+      <div class="container">
+        <h1>Tomato Clock</h1>
+        <p>It's a easy tomato clock.</p>
+      </div>
+    </div>  
+    <div id="content" class="container">
         <div id="clock">
             <div class="cell single-cell">
                 <div class="ten-minutes">0</div>
@@ -81,12 +102,12 @@
                 <div class="mili-second">0 9 8 7 6 5 4 3 2 1</div>
             </div>
         </div>
-        <div id="control-group">
+        <div id="control-group" class="some-margin-bottom">
             <button id="start" class="btn btn-primary">start</button>
             <button id="pause" class="btn btn-warning">pause</button>
             <button id="clear" class="btn btn-danger">clear</button>
         </div>
-        <div id="short-keys">
+        <div id="short-keys" class="some-margin-bottom">
             <button id="set48" class="btn btn-success">48 mins</button>
             <button id="set25" class="btn btn-success">25 mins</button>
         </div>
