@@ -121,6 +121,7 @@ $(function(){
     function endOneTime (e) {
         p("end! seconds:"+passedSeconds);
         setAnimationPlayState("paused");
+        inStop();
         playAlarmEvents(alarmSeconds);
         refreshStopTimeAndStatus(stopTime);
     }
