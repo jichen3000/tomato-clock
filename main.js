@@ -199,11 +199,8 @@ $(function(){
     $('button#set').click(function(){
         setStopTimeAndStatusAndURL($('input#stop-minutes').val());
     });
-    $('button#set48').click(function(){
-        setStopTimeAndStatusAndURL(48);
-    });
-    $('button#set25').click(function(){
-        setStopTimeAndStatusAndURL(25);
+    $('button.short-key').click(function(){
+        setStopTimeAndStatusAndURL($(this).val());
     });
     $('button#test').click(function(){
         urlPath = "file://localhost/Users/Colin/work/notes/codes/js/stopwatch/count_down.html#0100";
