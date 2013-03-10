@@ -62,7 +62,7 @@ function inRunning () {
 function inStop () {
     $("button#start").show();
     $("button#pause").hide();
-    $("button#clear").show();
+    $("button#clear").hide();
     $("button#continue").hide();
 
     $("div#set-time-group").show();
