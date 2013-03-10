@@ -54,6 +54,7 @@ function inRunning () {
     $("button#start").hide();
     $("button#pause").show();
     $("button#clear").hide();
+    $("button#continue").hide();
 
     $("div#set-time-group").hide();
     $("div#short-keys").hide();
@@ -62,14 +63,16 @@ function inStop () {
     $("button#start").show();
     $("button#pause").hide();
     $("button#clear").show();
+    $("button#continue").hide();
 
     $("div#set-time-group").show();
     $("div#short-keys").show();
 }
 function inPause () {
-    $("button#start").show();
+    $("button#start").hide();
     $("button#pause").hide();
     $("button#clear").show();
+    $("button#continue").show();
 
     $("div#set-time-group").hide();
     $("div#short-keys").hide();
@@ -170,6 +173,10 @@ $(function(){
         endOneTime(e);
     });
     $("button#start").click(function(){
+        startCoundDown(stopTime);
+        inRunning();
+    });
+    $("button#continue").click(function(){
         startCoundDown(stopTime);
         inRunning();
     });
