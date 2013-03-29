@@ -126,6 +126,18 @@ colinM.tc = (function () {
         self.stopAlarmAudio();
         self.stopAlarmAnimation();
     };
+    self.getStopTimeFromURL = function () {
+        if(window.location.hash!=""){
+            return self.getFullStopTime(window.location.hash.substring(1));
+        };
+        return NONE;
+    };
+    self.showStopTime = function (timeStr) {
+        $("div.ten-minutes").text(self.getMinutes(timeStr)[0]);
+        $("div.minutes").text(self.getMinutes(timeStr)[1]);
+        $("div.ten-seconds").text(self.getSeconds(timeStr)[0]);
+        $("div.seconds").text(self.getSeconds(timeStr)[1]);
+    };
     return self;
 }());
 colinM.tc.test();
@@ -145,32 +157,20 @@ $(function(){
         colinM.tc.playAlarmEvents(alarmSeconds);
         refreshStopTimeAndStatus(stopTime);
     }
-    function getStopTimeFromURL () {
-        if(window.location.hash!=""){
-            return colinM.tc.getFullStopTime(window.location.hash.substring(1));
-        };
-        return NONE;
-    }
-    function showStopTime (timeStr) {
-        $("div.ten-minutes").text(colinM.tc.getMinutes(timeStr)[0]);
-        $("div.minutes").text(colinM.tc.getMinutes(timeStr)[1]);
-        $("div.ten-seconds").text(colinM.tc.getSeconds(timeStr)[0]);
-        $("div.seconds").text(colinM.tc.getSeconds(timeStr)[1]);
-    }
     function setAnimationPlayState (state) {
         status = state;
         miliSecondsEL.css("webkitAnimationPlayState",state);
     }
     function setIerationCount () {
-        miliSecondsEL.css("webkitAnimation","moveten 1s steps(10, end) "+colinM.tc.computerSeconds(stopTime));
+        miliSecondsEL.css("webkitAnimation","moveten 1s steps(10, end) " +
+            colinM.tc.computerSeconds(stopTime));
         miliSecondsEL.css("webkitAnimationPlayState","paused");
-        // $('div.mili-second')[0].style.webkitAnimation = "moveten 1s steps(10, end) "+colinM.tc.getFullStopTime(stopTime);
     }
     function refreshStopTimeAndStatus (timeStr) {
         stopTime = colinM.tc.getFullStopTime(timeStr);
         miliSecondsEL.css('webkitAnimation', NONE);
         status = NONE;
-        showStopTime(stopTime);
+        colinM.tc.showStopTime(stopTime);
         colinM.tc.p("refreshStopTimeAndStatus:"+colinM.tc.computerSeconds(stopTime));
     }
     function startCoundDown (timeStr) {
@@ -178,13 +178,13 @@ $(function(){
         if(status==NONE){
             setIerationCount();
             passedSeconds = 1;
-            showStopTime(colinM.tc.computerLeftTimeStr(timeStr, passedSeconds));
+            colinM.tc.showStopTime(colinM.tc.computerLeftTimeStr(timeStr, passedSeconds));
         };
         setAnimationPlayState("running");
     }
     miliSecondsEL.on('webkitAnimationIteration', function(e) {
         colinM.tc.p("passedSeconds:"+ passedSeconds++);
-        showStopTime(colinM.tc.computerLeftTimeStr(stopTime, passedSeconds));
+        colinM.tc.showStopTime(colinM.tc.computerLeftTimeStr(stopTime, passedSeconds));
     });
     miliSecondsEL.on('webkitAnimationEnd', function(e) {
         endOneTime(e);
@@ -230,8 +230,8 @@ $(function(){
         }
     }
     function main () {
-        if (getStopTimeFromURL()!=NONE) {
-            stopTime=colinM.tc.getFullStopTime(getStopTimeFromURL());
+        if (colinM.tc.getStopTimeFromURL()!=NONE) {
+            stopTime=colinM.tc.getFullStopTime(colinM.tc.getStopTimeFromURL());
         };
         refreshStopTimeAndStatus(stopTime);
         colinM.tc.inStop();
