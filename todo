@@ -1,5 +1,7 @@
 tomorrow:
   ☐ html5 offline store test
+  ☐ useing event
+  ☐ check before 'set'
   ☐ create a server
   ☐ store user
   ☐ store every record
@@ -8,6 +10,7 @@ tomorrow:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ refactor using js namespaces @done (13-03-29 21:45)
  ✔ adjust button logic, status: stop(start, set time), running(pause), pause(start, clear) @done (13-03-04 21:43)
  ✔ adjust some divs representations. @done (13-03-02 20:17)
  ✔ adjust input of minutes @done (13-03-01 06:18)

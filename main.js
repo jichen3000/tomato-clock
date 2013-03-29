@@ -1,10 +1,15 @@
 var colinM = colinM || {};
 colinM.tc = (function () {
-    var stringProto = String.prototype,
+    var $m = $, // just for statement
+        stringProto = String.prototype,
         alarmAudio=new Audio("exclamation.mp3"),
         NONE = "none",
         alarmSeconds = 2,
         alarmAnimationEL = $("div#clock"),
+        stopTime = "0010",
+        miliSecondsEL = $('div.mili-second'),
+        status = NONE,
+        passedSeconds = 0,
         self = {};
     
     var pl = function (str) {
@@ -52,19 +57,19 @@ colinM.tc = (function () {
         else
             return this;
     };
-    self.getFullStopTime = function (time) {
+    var getFullStopTime = function (time) {
         return time.toString().ljust(4,"0");
     };
-    self.getMinutes = function (timeStr) {
+    var getMinutes = function (timeStr) {
         return timeStr.substr(0,2);
     };
-    self.getSeconds = function (timeStr) {
+    var getSeconds = function (timeStr) {
         return timeStr.substr(2,2);
     };
-    self.computerSeconds = function (timeStr) {
-        return parseInt(self.getMinutes(timeStr))*60+parseInt(self.getSeconds(timeStr));
+    var computerSeconds = function (timeStr) {
+        return parseInt(getMinutes(timeStr))*60+parseInt(getSeconds(timeStr));
     };
-    self.inRunning = function () {
+    var inRunning = function () {
         $("button#start").hide();
         $("button#pause").show();
         $("button#clear").hide();
@@ -73,7 +78,7 @@ colinM.tc = (function () {
         $("div#set-time-group").hide();
         $("div#short-keys").hide();
     };
-    self.inStop = function () {
+    var inStop = function () {
         $("button#start").show();
         $("button#pause").hide();
         $("button#clear").hide();
@@ -82,7 +87,7 @@ colinM.tc = (function () {
         $("div#set-time-group").show();
         $("div#short-keys").show();
     };
-    self.inPause = function () {
+    var inPause = function () {
         $("button#start").hide();
         $("button#pause").hide();
         $("button#clear").show();
@@ -91,125 +96,113 @@ colinM.tc = (function () {
         $("div#set-time-group").hide();
         $("div#short-keys").hide();
     };
-    self.computerLeftTimeStr = function (timeStr,seconds) {
+    var computerLeftTimeStr = function (timeStr,seconds) {
         var parseSeconds = seconds % 60;
         var parseMinutes = (seconds - parseSeconds) / 60;
-        var leftSeconds = parseInt(self.getSeconds(timeStr))-parseSeconds;
-        var leftMinutes = parseInt(self.getMinutes(timeStr))-parseMinutes;
+        var leftSeconds = parseInt(getSeconds(timeStr))-parseSeconds;
+        var leftMinutes = parseInt(getMinutes(timeStr))-parseMinutes;
         if (leftSeconds < 0) {
             leftSeconds = 60 + leftSeconds;
             leftMinutes = leftMinutes - 1;
         };
         return leftMinutes.toString().rjust(2,"0") + leftSeconds.toString().rjust(2,"0");
     };
-    self.playAlarmAudio = function () { 
+    var playAlarmAudio = function () { 
         alarmAudio.loop=true;
         alarmAudio.play(); 
     };
-    self.stopAlarmAudio = function () {
+    var stopAlarmAudio = function () {
         alarmAudio.pause();
     };
-    self.playAlarmAnimation = function () {
+    var playAlarmAnimation = function () {
         alarmAnimationEL.css("webkitAnimation","change-color 1s steps(10, end) "+alarmSeconds);
     };
-    self.stopAlarmAnimation = function () {
+    var stopAlarmAnimation = function () {
         alarmAnimationEL.css("webkitAnimation",NONE);   
     };
-    self.playAlarmEvents = function (playSeconds) {
-        self.playAlarmAudio();
-        self.playAlarmAnimation();
+    var playAlarmEvents = function (playSeconds) {
+        playAlarmAudio();
+        playAlarmAnimation();
         setTimeout(function () {
-            self.stopAlarmEvents();
+            stopAlarmEvents();
         },playSeconds*1000);
     };
-    self.stopAlarmEvents = function () {
-        self.stopAlarmAudio();
-        self.stopAlarmAnimation();
+    var stopAlarmEvents = function () {
+        stopAlarmAudio();
+        stopAlarmAnimation();
     };
-    self.getStopTimeFromURL = function () {
-        if(window.location.hash!=""){
-            return self.getFullStopTime(window.location.hash.substring(1));
+    var getStopTimeFromURL = function () {
+        if(window.location.hash !== ""){
+            return getFullStopTime(window.location.hash.substring(1));
         };
         return NONE;
     };
-    self.showStopTime = function (timeStr) {
-        $("div.ten-minutes").text(self.getMinutes(timeStr)[0]);
-        $("div.minutes").text(self.getMinutes(timeStr)[1]);
-        $("div.ten-seconds").text(self.getSeconds(timeStr)[0]);
-        $("div.seconds").text(self.getSeconds(timeStr)[1]);
+    var showStopTime = function (timeStr) {
+        $("div.ten-minutes").text(getMinutes(timeStr)[0]);
+        $("div.minutes").text(getMinutes(timeStr)[1]);
+        $("div.ten-seconds").text(getSeconds(timeStr)[0]);
+        $("div.seconds").text(getSeconds(timeStr)[1]);
     };
-    return self;
-}());
-colinM.tc.test();
- 
-
-$(function(){
-    var NONE = "none";
-    var stopTime = "0010";
-    var miliSecondsEL = $('div.mili-second');
-    var status = NONE;
-    var passedSeconds = 0;
-    var alarmSeconds = 2;
-    function endOneTime (e) {
-        colinM.tc.p("end! seconds:"+passedSeconds);
+    var endOneTime = function (e) {
+        self.p("end! seconds:"+passedSeconds);
         setAnimationPlayState("paused");
-        colinM.tc.inStop();
-        colinM.tc.playAlarmEvents(alarmSeconds);
+        inStop();
+        playAlarmEvents(alarmSeconds);
         refreshStopTimeAndStatus(stopTime);
     }
-    function setAnimationPlayState (state) {
+    var setAnimationPlayState = function (state) {
         status = state;
         miliSecondsEL.css("webkitAnimationPlayState",state);
     }
-    function setIerationCount () {
+    var setIerationCount = function () {
         miliSecondsEL.css("webkitAnimation","moveten 1s steps(10, end) " +
-            colinM.tc.computerSeconds(stopTime));
+            computerSeconds(stopTime));
         miliSecondsEL.css("webkitAnimationPlayState","paused");
     }
-    function refreshStopTimeAndStatus (timeStr) {
-        stopTime = colinM.tc.getFullStopTime(timeStr);
+    var refreshStopTimeAndStatus = function (timeStr) {
+        stopTime = getFullStopTime(timeStr);
         miliSecondsEL.css('webkitAnimation', NONE);
         status = NONE;
-        colinM.tc.showStopTime(stopTime);
-        colinM.tc.p("refreshStopTimeAndStatus:"+colinM.tc.computerSeconds(stopTime));
+        showStopTime(stopTime);
+        self.p("refreshStopTimeAndStatus:"+computerSeconds(stopTime));
     }
-    function startCoundDown (timeStr) {
-        colinM.tc.stopAlarmEvents();
-        if(status==NONE){
+    var startCoundDown = function (timeStr) {
+        stopAlarmEvents();
+        if(status === NONE){
             setIerationCount();
             passedSeconds = 1;
-            colinM.tc.showStopTime(colinM.tc.computerLeftTimeStr(timeStr, passedSeconds));
+            showStopTime(computerLeftTimeStr(timeStr, passedSeconds));
         };
         setAnimationPlayState("running");
     }
     miliSecondsEL.on('webkitAnimationIteration', function(e) {
-        colinM.tc.p("passedSeconds:"+ passedSeconds++);
-        colinM.tc.showStopTime(colinM.tc.computerLeftTimeStr(stopTime, passedSeconds));
+        self.p("passedSeconds:"+ passedSeconds++);
+        showStopTime(computerLeftTimeStr(stopTime, passedSeconds));
     });
     miliSecondsEL.on('webkitAnimationEnd', function(e) {
         endOneTime(e);
     });
     $("button#start").click(function(){
         startCoundDown(stopTime);
-        colinM.tc.inRunning();
+        inRunning();
     });
     $("button#continue").click(function(){
         startCoundDown(stopTime);
-        colinM.tc.inRunning();
+        inRunning();
     });
     $("button#pause").click(function(){
         setAnimationPlayState("paused");
-        colinM.tc.inPause();
+        inPause();
     });
     $("button#clear").click(function(){
-        colinM.tc.stopAlarmEvents();
+        stopAlarmEvents();
         refreshStopTimeAndStatus(stopTime);
-        colinM.tc.inStop();
+        inStop();
     });
-    function changeURL (timeStr) {
+    var changeURL = function (timeStr) {
         window.location.hash="#"+timeStr;
     }
-    function setStopTimeAndStatusAndURL (timeValue) {
+    var setStopTimeAndStatusAndURL = function (timeValue) {
         refreshStopTimeAndStatus(timeValue);
         changeURL(stopTime);
     }
@@ -226,15 +219,21 @@ $(function(){
     });
     if ("onhashchange" in window) { // does the browser support the hashchange event?
         window.onhashchange = function () {
-            main();
+            self.main();
         }
     }
-    function main () {
-        if (colinM.tc.getStopTimeFromURL()!=NONE) {
-            stopTime=colinM.tc.getFullStopTime(colinM.tc.getStopTimeFromURL());
+    self.main = function () {
+        if (getStopTimeFromURL()!=NONE) {
+            stopTime=getFullStopTime(getStopTimeFromURL());
         };
         refreshStopTimeAndStatus(stopTime);
-        colinM.tc.inStop();
+        inStop();
     }
-    main();
+    return self;
+}());
+colinM.tc.test();
+ 
+
+$(function(){
+    colinM.tc.main();
 });
