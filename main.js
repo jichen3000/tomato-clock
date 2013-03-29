@@ -1,203 +1,213 @@
-String.prototype.repeat = function( num ) {
-    for( var i = 0, buf = ""; i < num; i++ ) buf += this;
-    return buf;
-}
-String.prototype.ljust = function( width, padding ) {
-    padding = padding || " ";
-    padding = padding.substr( 0, 1 );
-    if( this.length < width )
-        return this + padding.repeat( width - this.length );
-    else
-        return this;
-}
-String.prototype.rjust = function( width, padding ) {
-    padding = padding || " ";
-    padding = padding.substr( 0, 1 );
-    if( this.length < width )
-        return padding.repeat( width - this.length ) + this;
-    else
-        return this;
-}
-String.prototype.center = function( width, padding ) {
-    padding = padding || " ";
-    padding = padding.substr( 0, 1 );
-    if( this.length < width ) {
-        var len     = width - this.length;
-        var remain  = ( len % 2 == 0 ) ? "" : padding;
-        var pads    = padding.repeat( parseInt( len / 2 ) );
-        return pads + this + pads + remain;
-    }
-    else
-        return this;
-}
-// alert( "Ruby".center( 10 ) );      // "   Ruby   "
-// alert( "Ruby".rjust( 10 ) );       // "      Ruby"
-// alert( "Ruby".ljust( 10 ) );       // "Ruby      "
-// alert( "Ruby".center( 10, "+" ) ); // "+++Ruby+++"
-   
-function p(msg){
-  $("p#messages").text(msg);
-}    
-function getFullStopTime(time){
-    return time.toString().ljust(4,"0");
-}
-function getSeconds(timeStr){
-    return timeStr.substr(2,2);
-}
-function getMinutes(timeStr){
-    return timeStr.substr(0,2);
-}
-function computerSeconds(timeStr){
-    return parseInt(getMinutes(timeStr))*60+parseInt(getSeconds(timeStr));
-}
-function inRunning () {
-    $("button#start").hide();
-    $("button#pause").show();
-    $("button#clear").hide();
-    $("button#continue").hide();
-
-    $("div#set-time-group").hide();
-    $("div#short-keys").hide();
-}
-function inStop () {
-    $("button#start").show();
-    $("button#pause").hide();
-    $("button#clear").hide();
-    $("button#continue").hide();
-
-    $("div#set-time-group").show();
-    $("div#short-keys").show();
-}
-function inPause () {
-    $("button#start").hide();
-    $("button#pause").hide();
-    $("button#clear").show();
-    $("button#continue").show();
-
-    $("div#set-time-group").hide();
-    $("div#short-keys").hide();
-}
-function computerLeftTimeStr (timeStr,seconds) {
-    var parseSeconds = seconds % 60;
-    var parseMinutes = (seconds - parseSeconds) / 60;
-    var leftSeconds = parseInt(getSeconds(timeStr))-parseSeconds;
-    var leftMinutes = parseInt(getMinutes(timeStr))-parseMinutes;
-    if (leftSeconds < 0) {
-        leftSeconds = 60 + leftSeconds;
-        leftMinutes = leftMinutes - 1;
+var colinM = colinM || {};
+colinM.tc = (function () {
+    var stringProto = String.prototype,
+        alarmAudio=new Audio("exclamation.mp3"),
+        NONE = "none",
+        alarmSeconds = 2,
+        alarmAnimationEL = $("div#clock"),
+        self = {};
+    
+    var pl = function (str) {
+        console.log(str);
     };
-    return leftMinutes.toString().rjust(2,"0") + leftSeconds.toString().rjust(2,"0");
-}
+    self.p = function (msg){
+      $("p#messages").text(msg);
+    };    
+    self.test = function () {
+        pl("test".repeat(5));  
+    };
+    // These functions even could work outside colinM.tc.
+    // "Ruby".rjust( 10 );       // "      Ruby"
+    // "Ruby".ljust( 10 );       // "Ruby      "
+    // "Ruby".center( 10, "+" ); // "+++Ruby+++"
+    stringProto.repeat = function( num ) {
+        for( var i = 0, buf = ""; i < num; i++ ) buf += this;
+        return buf;
+    }; 
+    stringProto.ljust = function( width, padding ) {
+        padding = padding || " ";
+        padding = padding.substr( 0, 1 );
+        if( this.length < width )
+            return this + padding.repeat( width - this.length );
+        else
+            return this;
+    };
+    stringProto.rjust = function( width, padding ) {
+        padding = padding || " ";
+        padding = padding.substr( 0, 1 );
+        if( this.length < width )
+            return padding.repeat( width - this.length ) + this;
+        else
+            return this;
+    };
+    stringProto.center = function( width, padding ) {
+        padding = padding || " ";
+        padding = padding.substr( 0, 1 );
+        if( this.length < width ) {
+            var len     = width - this.length;
+            var remain  = ( len % 2 == 0 ) ? "" : padding;
+            var pads    = padding.repeat( parseInt( len / 2 ) );
+            return pads + this + pads + remain;
+        }
+        else
+            return this;
+    };
+    self.getFullStopTime = function (time) {
+        return time.toString().ljust(4,"0");
+    };
+    self.getMinutes = function (timeStr) {
+        return timeStr.substr(0,2);
+    };
+    self.getSeconds = function (timeStr) {
+        return timeStr.substr(2,2);
+    };
+    self.computerSeconds = function (timeStr) {
+        return parseInt(self.getMinutes(timeStr))*60+parseInt(self.getSeconds(timeStr));
+    };
+    self.inRunning = function () {
+        $("button#start").hide();
+        $("button#pause").show();
+        $("button#clear").hide();
+        $("button#continue").hide();
+
+        $("div#set-time-group").hide();
+        $("div#short-keys").hide();
+    };
+    self.inStop = function () {
+        $("button#start").show();
+        $("button#pause").hide();
+        $("button#clear").hide();
+        $("button#continue").hide();
+
+        $("div#set-time-group").show();
+        $("div#short-keys").show();
+    };
+    self.inPause = function () {
+        $("button#start").hide();
+        $("button#pause").hide();
+        $("button#clear").show();
+        $("button#continue").show();
+
+        $("div#set-time-group").hide();
+        $("div#short-keys").hide();
+    };
+    self.computerLeftTimeStr = function (timeStr,seconds) {
+        var parseSeconds = seconds % 60;
+        var parseMinutes = (seconds - parseSeconds) / 60;
+        var leftSeconds = parseInt(self.getSeconds(timeStr))-parseSeconds;
+        var leftMinutes = parseInt(self.getMinutes(timeStr))-parseMinutes;
+        if (leftSeconds < 0) {
+            leftSeconds = 60 + leftSeconds;
+            leftMinutes = leftMinutes - 1;
+        };
+        return leftMinutes.toString().rjust(2,"0") + leftSeconds.toString().rjust(2,"0");
+    };
+    self.playAlarmAudio = function () { 
+        alarmAudio.loop=true;
+        alarmAudio.play(); 
+    };
+    self.stopAlarmAudio = function () {
+        alarmAudio.pause();
+    };
+    self.playAlarmAnimation = function () {
+        alarmAnimationEL.css("webkitAnimation","change-color 1s steps(10, end) "+alarmSeconds);
+    };
+    self.stopAlarmAnimation = function () {
+        alarmAnimationEL.css("webkitAnimation",NONE);   
+    };
+    self.playAlarmEvents = function (playSeconds) {
+        self.playAlarmAudio();
+        self.playAlarmAnimation();
+        setTimeout(function () {
+            self.stopAlarmEvents();
+        },playSeconds*1000);
+    };
+    self.stopAlarmEvents = function () {
+        self.stopAlarmAudio();
+        self.stopAlarmAnimation();
+    };
+    return self;
+}());
+colinM.tc.test();
+ 
+
 $(function(){
     var NONE = "none";
     var stopTime = "0010";
     var miliSecondsEL = $('div.mili-second');
     var status = NONE;
     var passedSeconds = 0;
-    var alarmAnimationEL = $("div#clock");
-    var alarmAudio=new Audio("exclamation.mp3");
     var alarmSeconds = 2;
-    function playAlarmAudio(){ 
-        alarmAudio.loop=true;
-        alarmAudio.play(); 
-    } 
-    function stopAlarmAudio () {
-        alarmAudio.pause();
-    }
-    function playAlarmAnimation () {
-        alarmAnimationEL.css("webkitAnimation","change-color 1s steps(10, end) "+alarmSeconds);
-    }
-    function stopAlarmAnimation () {
-        alarmAnimationEL.css("webkitAnimation",NONE);   
-    }
-    function playAlarmEvents (playSeconds) {
-        playAlarmAudio();
-        playAlarmAnimation();
-        setTimeout(function () {
-            stopAlarmEvents();
-        },playSeconds*1000);
-    }
-    function stopAlarmEvents () {
-        stopAlarmAudio();
-        stopAlarmAnimation();
-    }
     function endOneTime (e) {
-        p("end! seconds:"+passedSeconds);
+        colinM.tc.p("end! seconds:"+passedSeconds);
         setAnimationPlayState("paused");
-        inStop();
-        playAlarmEvents(alarmSeconds);
+        colinM.tc.inStop();
+        colinM.tc.playAlarmEvents(alarmSeconds);
         refreshStopTimeAndStatus(stopTime);
     }
     function getStopTimeFromURL () {
         if(window.location.hash!=""){
-            return getFullStopTime(window.location.hash.substring(1));
+            return colinM.tc.getFullStopTime(window.location.hash.substring(1));
         };
         return NONE;
     }
     function showStopTime (timeStr) {
-        $("div.ten-minutes").text(getMinutes(timeStr)[0]);
-        $("div.minutes").text(getMinutes(timeStr)[1]);
-        $("div.ten-seconds").text(getSeconds(timeStr)[0]);
-        $("div.seconds").text(getSeconds(timeStr)[1]);
+        $("div.ten-minutes").text(colinM.tc.getMinutes(timeStr)[0]);
+        $("div.minutes").text(colinM.tc.getMinutes(timeStr)[1]);
+        $("div.ten-seconds").text(colinM.tc.getSeconds(timeStr)[0]);
+        $("div.seconds").text(colinM.tc.getSeconds(timeStr)[1]);
     }
     function setAnimationPlayState (state) {
         status = state;
         miliSecondsEL.css("webkitAnimationPlayState",state);
     }
     function setIerationCount () {
-        miliSecondsEL.css("webkitAnimation","moveten 1s steps(10, end) "+computerSeconds(stopTime));
+        miliSecondsEL.css("webkitAnimation","moveten 1s steps(10, end) "+colinM.tc.computerSeconds(stopTime));
         miliSecondsEL.css("webkitAnimationPlayState","paused");
-        // $('div.mili-second')[0].style.webkitAnimation = "moveten 1s steps(10, end) "+getFullStopTime(stopTime);
+        // $('div.mili-second')[0].style.webkitAnimation = "moveten 1s steps(10, end) "+colinM.tc.getFullStopTime(stopTime);
     }
     function refreshStopTimeAndStatus (timeStr) {
-        stopTime = getFullStopTime(timeStr);
+        stopTime = colinM.tc.getFullStopTime(timeStr);
         miliSecondsEL.css('webkitAnimation', NONE);
         status = NONE;
         showStopTime(stopTime);
-        p("refreshStopTimeAndStatus:"+computerSeconds(stopTime));
+        colinM.tc.p("refreshStopTimeAndStatus:"+colinM.tc.computerSeconds(stopTime));
     }
     function startCoundDown (timeStr) {
-        stopAlarmEvents();
+        colinM.tc.stopAlarmEvents();
         if(status==NONE){
             setIerationCount();
             passedSeconds = 1;
-            showStopTime(computerLeftTimeStr(timeStr, passedSeconds));
+            showStopTime(colinM.tc.computerLeftTimeStr(timeStr, passedSeconds));
         };
         setAnimationPlayState("running");
     }
     miliSecondsEL.on('webkitAnimationIteration', function(e) {
-        p("passedSeconds:"+ passedSeconds++);
-        showStopTime(computerLeftTimeStr(stopTime, passedSeconds));
+        colinM.tc.p("passedSeconds:"+ passedSeconds++);
+        showStopTime(colinM.tc.computerLeftTimeStr(stopTime, passedSeconds));
     });
     miliSecondsEL.on('webkitAnimationEnd', function(e) {
         endOneTime(e);
     });
     $("button#start").click(function(){
         startCoundDown(stopTime);
-        inRunning();
+        colinM.tc.inRunning();
     });
     $("button#continue").click(function(){
         startCoundDown(stopTime);
-        inRunning();
+        colinM.tc.inRunning();
     });
     $("button#pause").click(function(){
         setAnimationPlayState("paused");
-        inPause();
+        colinM.tc.inPause();
     });
     $("button#clear").click(function(){
-        stopAlarmEvents();
+        colinM.tc.stopAlarmEvents();
         refreshStopTimeAndStatus(stopTime);
-        inStop();
+        colinM.tc.inStop();
     });
     function changeURL (timeStr) {
         window.location.hash="#"+timeStr;
-        // var sharp = "#";
-        // var nextURL = document.URL;
-        // if (nextURL.indexOf(sharp) >0 ) {
-        //     nextURL = nextURL.substring(0,nextURL.indexOf(sharp));
-        // };
-        // nextURL += sharp+timeStr;
-        // window.history.pushState({"html":document.URL,"pageTitle":document.pageTitle},"", nextURL);
     }
     function setStopTimeAndStatusAndURL (timeValue) {
         refreshStopTimeAndStatus(timeValue);
@@ -221,10 +231,10 @@ $(function(){
     }
     function main () {
         if (getStopTimeFromURL()!=NONE) {
-            stopTime=getFullStopTime(getStopTimeFromURL());
+            stopTime=colinM.tc.getFullStopTime(getStopTimeFromURL());
         };
         refreshStopTimeAndStatus(stopTime);
-        inStop();
+        colinM.tc.inStop();
     }
     main();
 });

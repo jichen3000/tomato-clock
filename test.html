@@ -1,0 +1,32 @@
+<!DOCTYPE html> 
+<html> 
+<body> 
+
+    <button onclick="playVid()" type="button">Play Audio</button>
+    <button onclick="pauseVid()" type="button">Pause Audio</button> 
+    <br> 
+
+    <script> 
+    var myAudio=new Audio("exclamation.mp3");
+    function playVid()
+    { 
+        myAudio.loop=true;
+        myAudio.play(); 
+        setTimeout(function () {
+            //alert("This code will run last, after a 5 second delay")
+            myAudio.pause();
+        }, 2000);
+    } 
+
+    function pauseVid()
+    { 
+      myAudio.pause(); 
+    } 
+    </script> 
+
+  <p>Audio courtesy of .</p>
+
+</body> 
+</html>
+
+
