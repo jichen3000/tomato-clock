@@ -1,7 +1,6 @@
 var colinM = colinM || {};
 colinM.tc = (function () {
-    var $m = $, // just for statement
-        stringProto = String.prototype,
+    var stringProto = String.prototype,
         alarmAudio=new Audio("exclamation.mp3"),
         NONE = "none",
         alarmSeconds = 2,
@@ -10,6 +9,12 @@ colinM.tc = (function () {
         miliSecondsEL = $('div.mili-second'),
         status = NONE,
         passedSeconds = 0,
+        startEl = $("button#start"),
+        pauseEl = $("button#pause"),
+        clearEl = $("button#clear"),
+        continueEl = $("button#continue"),
+        setTimeGroupEl = $("div#set-time-group"),
+        shortKeysEl = $("div#short-keys"),
         self = {};
     
     var pl = function (str) {
@@ -70,31 +75,31 @@ colinM.tc = (function () {
         return parseInt(getMinutes(timeStr))*60+parseInt(getSeconds(timeStr));
     };
     var inRunning = function () {
-        $("button#start").hide();
-        $("button#pause").show();
-        $("button#clear").hide();
-        $("button#continue").hide();
+        startEl.hide();
+        pauseEl.show();
+        clearEl.hide();
+        continueEl.hide();
 
-        $("div#set-time-group").hide();
-        $("div#short-keys").hide();
+        setTimeGroupEl.hide();
+        shortKeysEl.hide();
     };
     var inStop = function () {
-        $("button#start").show();
-        $("button#pause").hide();
-        $("button#clear").hide();
-        $("button#continue").hide();
+        startEl.show();
+        pauseEl.hide();
+        clearEl.hide();
+        continueEl.hide();
 
-        $("div#set-time-group").show();
-        $("div#short-keys").show();
+        setTimeGroupEl.show();
+        shortKeysEl.show();
     };
     var inPause = function () {
-        $("button#start").hide();
-        $("button#pause").hide();
-        $("button#clear").show();
-        $("button#continue").show();
+        startEl.hide();
+        pauseEl.hide();
+        clearEl.show();
+        continueEl.show();
 
-        $("div#set-time-group").hide();
-        $("div#short-keys").hide();
+        setTimeGroupEl.hide();
+        shortKeysEl.hide();
     };
     var computerLeftTimeStr = function (timeStr,seconds) {
         var parseSeconds = seconds % 60;
@@ -182,19 +187,19 @@ colinM.tc = (function () {
     miliSecondsEL.on('webkitAnimationEnd', function(e) {
         endOneTime(e);
     });
-    $("button#start").click(function(){
+    startEl.click(function(){
         startCoundDown(stopTime);
         inRunning();
     });
-    $("button#continue").click(function(){
+    continueEl.click(function(){
         startCoundDown(stopTime);
         inRunning();
     });
-    $("button#pause").click(function(){
+    pauseEl.click(function(){
         setAnimationPlayState("paused");
         inPause();
     });
-    $("button#clear").click(function(){
+    clearEl.click(function(){
         stopAlarmEvents();
         refreshStopTimeAndStatus(stopTime);
         inStop();
@@ -231,7 +236,7 @@ colinM.tc = (function () {
     }
     return self;
 }());
-colinM.tc.test();
+// colinM.tc.test();
  
 
 $(function(){
