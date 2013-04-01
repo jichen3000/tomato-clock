@@ -150,7 +150,7 @@ colinM.tc = (function () {
     };
     var getStopTimeFromURL = function () {
         if(window.location.hash !== ""){
-            return getFullStopTime(window.location.hash.substring(1));
+            return getFullStopTime(getValidatedTime(window.location.hash.substring(1)));
         };
         return NONE;
     };
@@ -221,13 +221,22 @@ colinM.tc = (function () {
         refreshStopTimeAndStatus(stopTime);
         inStop();
     });
+    var getValidatedTime = function (timeStr) {
+        var timeInt = parseInt10(timeStr);
+        if ( isNaN(timeInt) || timeInt <= 0) {
+            return '0001';
+        }else if (timeInt > 9959){
+            return '9959';
+        }
+        return timeStr;
+    };
     var changeURL = function (timeStr) {
         window.location.hash="#"+timeStr;
-    }
+    };
     var setStopTimeAndStatusAndURL = function (timeValue) {
-        refreshStopTimeAndStatus(timeValue);
+        refreshStopTimeAndStatus(getValidatedTime(timeValue));
         changeURL(stopTime);
-    }
+    };
     $('button#set').click(function(){
         setStopTimeAndStatusAndURL($('input#stop-minutes').val());
     });
