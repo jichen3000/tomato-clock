@@ -15,6 +15,7 @@ colinM.tc = (function () {
         continueEl = $("button#continue"),
         setTimeGroupEl = $("div#set-time-group"),
         shortKeysEl = $("div#short-keys"),
+        startTime,
         self = {};
     
     var pl = function (str) {
@@ -26,6 +27,17 @@ colinM.tc = (function () {
     self.test = function () {
         pl("test".repeat(5));  
     };
+    // This function copy from functional.js 
+    Function.prototype.rcurry = function() {
+        var slice = Array.prototype.slice;
+        var fun = this;
+        var args = slice.call(arguments);
+        return function() {
+            return fun.apply(this, slice.call(arguments).concat(args));
+        };
+    };
+    var parseInt10 = parseInt.rcurry(10);
+
     // These functions even could work outside colinM.tc.
     // "Ruby".rjust( 10 );       // "      Ruby"
     // "Ruby".ljust( 10 );       // "Ruby      "
@@ -56,7 +68,7 @@ colinM.tc = (function () {
         if( this.length < width ) {
             var len     = width - this.length;
             var remain  = ( len % 2 == 0 ) ? "" : padding;
-            var pads    = padding.repeat( parseInt( len / 2 ) );
+            var pads    = padding.repeat( parseInt10( len / 2 ) );
             return pads + this + pads + remain;
         }
         else
@@ -72,7 +84,7 @@ colinM.tc = (function () {
         return timeStr.substr(2,2);
     };
     var computerSeconds = function (timeStr) {
-        return parseInt(getMinutes(timeStr))*60+parseInt(getSeconds(timeStr));
+        return parseInt10(getMinutes(timeStr))*60+parseInt10(getSeconds(timeStr));
     };
     var inRunning = function () {
         startEl.hide();
@@ -104,8 +116,8 @@ colinM.tc = (function () {
     var computerLeftTimeStr = function (timeStr,seconds) {
         var parseSeconds = seconds % 60;
         var parseMinutes = (seconds - parseSeconds) / 60;
-        var leftSeconds = parseInt(getSeconds(timeStr))-parseSeconds;
-        var leftMinutes = parseInt(getMinutes(timeStr))-parseMinutes;
+        var leftSeconds = parseInt10(getSeconds(timeStr))-parseSeconds;
+        var leftMinutes = parseInt10(getMinutes(timeStr))-parseMinutes;
         if (leftSeconds < 0) {
             leftSeconds = 60 + leftSeconds;
             leftMinutes = leftMinutes - 1;
@@ -176,12 +188,17 @@ colinM.tc = (function () {
         if(status === NONE){
             setIerationCount();
             passedSeconds = 1;
+            // for test
+            startTime = (new Date()).getTime();
             showStopTime(computerLeftTimeStr(timeStr, passedSeconds));
         };
         setAnimationPlayState("running");
     }
     miliSecondsEL.on('webkitAnimationIteration', function(e) {
-        self.p("passedSeconds:"+ passedSeconds++);
+        passedSeconds += 1;
+        // for test
+        var otherTime = Math.ceil(((new Date()).getTime() - startTime) / 1000);
+        self.p("passedSeconds:"+ passedSeconds+" other:"+otherTime);
         showStopTime(computerLeftTimeStr(stopTime, passedSeconds));
     });
     miliSecondsEL.on('webkitAnimationEnd', function(e) {
