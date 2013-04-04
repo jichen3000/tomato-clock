@@ -1,9 +1,10 @@
 CACHE MANIFEST
-# 6 2013-04-01 
+# 7 2013-04-04
 /tomato-clock/DS-DIGI.TTF
 /tomato-clock/bootstrap.css
 /tomato-clock/bootstrap.min.js
 /tomato-clock/exclamation.mp3
 /tomato-clock/index.html
 /tomato-clock/jquery-1.7.2.min.js
-/tomato-clock/main.js
+/tomato-clock/tomatoclock.js
+/tomato-clock/timedown.js
