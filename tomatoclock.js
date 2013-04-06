@@ -1,40 +1,7 @@
 var colinM = colinM || {};
-colinM.tomatoClock = (function () {
+colinM.commons = (function () {
     var stringProto = String.prototype,
-        timedown = colinM.timedown,
-        alarmAudio=new Audio("exclamation.mp3"),
-        NONE = "none",
-        alarmSeconds = 2,
-        alarmAnimationEL = $("div#clock"),
-        stopTime = "0010",
-        miliSecondsEL = $('div.mili-second'),
-        status = NONE,
-        passedSeconds = 0,
-        // subtractedPassedSeconds = 0,
-        startEl = $("button#start"),
-        pauseEl = $("button#pause"),
-        clearEl = $("button#clear"),
-        continueEl = $("button#continue"),
-        setTimeGroupEl = $("div#set-time-group"),
-        shortKeysEl = $("div#short-keys"),
-        // startTime,
-        endTimeout,
-        // stopSeconds = 0,
-        timeList = [],
-        self = colinM.tomatoClock || {};
-
-    timedown.getShowPassedSeconds = function () {
-        return timedown.getPassedSeconds()+1;
-    };
-    var pl = function (str) {
-        console.log(str);
-    };
-    self.p = function (msg){
-      $("p#messages").text(msg);
-    };    
-    self.test = function () {
-        pl("test".repeat(5));  
-    };
+        self = colinM.commons || {};
     // This function copy from functional.js 
     Function.prototype.rcurry = function() {
         var slice = Array.prototype.slice;
@@ -44,7 +11,7 @@ colinM.tomatoClock = (function () {
             return fun.apply(this, slice.call(arguments).concat(args));
         };
     };
-    var parseInt10 = parseInt.rcurry(10);
+    self.parseInt10 = parseInt.rcurry(10);
 
     // These functions even could work outside colinM.tomatoClock.
     // "Ruby".rjust( 10 );       // "      Ruby"
@@ -82,55 +49,103 @@ colinM.tomatoClock = (function () {
         else
             return this;
     };
-    var getFullStopTime = function (time) {
-        return time.toString().ljust(4,"0");
+    return self;    
+}());
+
+colinM.tomatoClock = {};
+colinM.tomatoClock.timeString = (function () {
+    var self = colinM.tomatoClock.timeString || {},
+        parseInt10 = colinM.commons.parseInt10;
+    self.ljust4 = function (timeStr) {
+        return timeStr.ljust(4,"0");
     };
-    var getSingleMinutes = function (timeStr) {
+    self.getMinutesOnly = function (timeStr) {
         return timeStr.substr(0,2);
     };
-    var getSingleSeconds = function (timeStr) {
+    self.getSecondsOnly = function (timeStr) {
         return timeStr.substr(2,2);
     };
-    var toSeconds = function (timeStr) {
-        return parseInt10(getSingleMinutes(timeStr))*60+parseInt10(getSingleSeconds(timeStr));
+    self.toSeconds = function (timeStr) {
+        return parseInt10(this.getMinutesOnly(timeStr))*60+parseInt10(this.getSecondsOnly(timeStr));
     };
-    var inRunning = function () {
-        startEl.hide();
-        pauseEl.show();
-        clearEl.hide();
-        continueEl.hide();
-
-        setTimeGroupEl.hide();
-        shortKeysEl.hide();
-    };
-    var inStop = function () {
-        startEl.show();
-        pauseEl.hide();
-        clearEl.hide();
-        continueEl.hide();
-
-        setTimeGroupEl.show();
-        shortKeysEl.show();
-    };
-    var inPause = function () {
-        startEl.hide();
-        pauseEl.hide();
-        clearEl.show();
-        continueEl.show();
-
-        setTimeGroupEl.hide();
-        shortKeysEl.hide();
-    };
-    var computerLeftTimeStr = function (timeStr,seconds) {
+    self.fromSeconds = function (seconds) {
         var parseSeconds = seconds % 60;
         var parseMinutes = (seconds - parseSeconds) / 60;
-        var leftSeconds = parseInt10(getSingleSeconds(timeStr))-parseSeconds;
-        var leftMinutes = parseInt10(getSingleMinutes(timeStr))-parseMinutes;
+        return parseMinutes.toString().rjust(2,"0") + parseSeconds.toString().rjust(2,"0");
+    };
+    self.computerLeftTimeStr = function (timeStr,seconds) {
+        var parseSeconds = seconds % 60;
+        var parseMinutes = (seconds - parseSeconds) / 60;
+        var leftSeconds = parseInt10(this.getSecondsOnly(timeStr))-parseSeconds;
+        var leftMinutes = parseInt10(this.getMinutesOnly(timeStr))-parseMinutes;
         if (leftSeconds < 0) {
             leftSeconds = 60 + leftSeconds;
             leftMinutes = leftMinutes - 1;
         };
         return leftMinutes.toString().rjust(2,"0") + leftSeconds.toString().rjust(2,"0");
+    };
+
+
+    return self; 
+}());
+colinM.tomatoClock = (function () {
+    var timedown = colinM.timedown,
+        timeString = colinM.tomatoClock.timeString,
+        parseInt10 = colinM.commons.parseInt10,
+        alarmAudio=new Audio("exclamation.mp3"),
+        NONE = "none",
+        alarmSeconds = 2,
+        alarmAnimationEL = $("div#clock"),
+        stopTime = "0001",
+        miliSecondsEL = $('div.mili-second'),
+        startEl = $("button#start"),
+        pauseEl = $("button#pause"),
+        stopEl = $("button#stop"),
+        continueEl = $("button#continue"),
+        setTimeGroupEl = $("div#set-time-group"),
+        shortKeysEl = $("div#short-keys"),
+        self = colinM.tomatoClock || {};
+
+    var pl = function (str) {
+        console.log(str);
+    };
+    self.p = function (msg){
+      $("p#messages").text(msg);
+    };    
+    self.test = function () {
+        pl("test".repeat(5));  
+    };
+    var showButtons = function () {
+        if(timedown.isInRunning()){
+            
+        }
+    };
+    var showButtonsInRunning = function () {
+        startEl.hide();
+        pauseEl.show();
+        stopEl.hide();
+        continueEl.hide();
+
+        setTimeGroupEl.hide();
+        shortKeysEl.hide();
+    };
+    var ShowButtonsInStopped = function () {
+        startEl.show();
+        pauseEl.hide();
+        stopEl.hide();
+        continueEl.hide();
+
+        setTimeGroupEl.show();
+        shortKeysEl.show();
+    };
+    var showButtonsInPaused = function () {
+        startEl.hide();
+        pauseEl.hide();
+        stopEl.show();
+        continueEl.show();
+
+        setTimeGroupEl.hide();
+        shortKeysEl.hide();
     };
     var playAlarmAudio = function () { 
         alarmAudio.loop=true;
@@ -158,99 +173,73 @@ colinM.tomatoClock = (function () {
     };
     var getStopTimeFromURL = function () {
         if(window.location.hash !== ""){
-            return getFullStopTime(getValidatedTime(window.location.hash.substring(1)));
+            return timeString.ljust4(getValidatedTime(window.location.hash.substring(1)));
         };
         return NONE;
     };
     var showStopTime = function (timeStr) {
-        $("div.ten-minutes").text(getSingleMinutes(timeStr)[0]);
-        $("div.minutes").text(getSingleMinutes(timeStr)[1]);
-        $("div.ten-seconds").text(getSingleSeconds(timeStr)[0]);
-        $("div.seconds").text(getSingleSeconds(timeStr)[1]);
+        $("div.ten-minutes").text(timeString.getMinutesOnly(timeStr)[0]);
+        $("div.minutes").text(timeString.getMinutesOnly(timeStr)[1]);
+        $("div.ten-seconds").text(timeString.getSecondsOnly(timeStr)[0]);
+        $("div.seconds").text(timeString.getSecondsOnly(timeStr)[1]);
     };
-    var setAnimationPlayState = function (state) {
-        status = state;
+    var setMilliSecondsAnimationPlayState = function (state) {
         miliSecondsEL.css("webkitAnimationPlayState",state);
     };
-    var setMiliSecondElIerationCount = function (seconds) {
+    var setMiliSecondsElIerationCount = function (seconds) {
         miliSecondsEL.css("webkitAnimation","moveten 1s steps(10, end) " +
             seconds);
         miliSecondsEL.css("webkitAnimationPlayState","paused");
     };
     var refreshStopTimeAndStatus = function (timeStr) {
-        stopTime = getFullStopTime(timeStr);
+        stopTime = timeStr;
         miliSecondsEL.css('webkitAnimation', NONE);
-        status = NONE;
-        showStopTime(stopTime);
-        self.p("refreshStopTimeAndStatus:"+toSeconds(stopTime));
+        showStopTime(timeStr);
+        self.p("refreshStopTimeAndStatus:"+timeString.toSeconds(timeStr));
     };
-    // miliSecondsEL.on('webkitAnimationEnd', function(e) {
-    //     endEvent(e);
-    // });
-    var endEvent = function (e) {
-        setAnimationPlayState("paused");
-        inStop();
+    var stopEvent = function () {
+        setMilliSecondsAnimationPlayState("paused");
+        ShowButtonsInStopped();
         playAlarmEvents(alarmSeconds);
         refreshStopTimeAndStatus(stopTime);
         self.p("end! seconds:"+timedown.getPassedSeconds());
     };
-    var startCoundDown = function (timeStr) {
-        stopAlarmEvents();
-        var seconds = toSeconds(timeStr);
-        setMiliSecondElIerationCount(seconds);
-        passedSeconds = 1;
-        timedown.start(seconds, endEvent);
-        // endTimeout = setTimeout(endEvent, seconds*1000);
-        // subtractedPassedSeconds = 1;
-        // stopSeconds = 0;
-        // for test
-        startTime = (new Date()).getTime();
-        showStopTime(computerLeftTimeStr(timeStr, timedown.getShowPassedSeconds()));
-        setAnimationPlayState("running");
-    };
-    // var computerTotalSubtractedPassedSeconds = function  (startTime) {
-    //     return Math.floor(((new Date()).getTime() - startTime) / 1000)+1;
-    // }
-    var continueCoundDown = function (timeStr) {
-        stopAlarmEvents();
-        // var seconds = toSeconds(timeStr) - subtractedPassedSeconds-stopSeconds;
-        // stopSeconds = computerTotalSubtractedPassedSeconds(startTime) - subtractedPassedSeconds;
-        // endTimeout = setTimeout(endEvent, seconds*1000);
-        timedown.resume();
-        showStopTime(computerLeftTimeStr(timeStr, timedown.getShowPassedSeconds()));
-        // showStopTime(computerLeftTimeStr(timeStr, subtractedPassedSeconds));
-        setAnimationPlayState("running");
-    };
     window.onfocus = function () {
-        showStopTime(computerLeftTimeStr(stopTime, timedown.getShowPassedSeconds()));
+        if(timedown.isInRunning()){
+            showStopTime(timeString.fromSeconds(timedown.getRemainedOneSeconds()));
+        };
     };
     miliSecondsEL.on('webkitAnimationIteration', function(e) {
-        passedSeconds += 1;
+        showStopTime(timeString.fromSeconds(timedown.getRemainedOneSeconds()));
         // for test
-        // var tmpPassedSeconds = computerTotalSubtractedPassedSeconds(startTime)-stopSeconds;
-        self.p("passedSeconds:"+ passedSeconds+" other:"+(timedown.getShowPassedSeconds()));
-        showStopTime(computerLeftTimeStr(stopTime, timedown.getShowPassedSeconds()));
+        self.p("passedSeconds:"+timedown.getPassedOneSeconds());
     });
     startEl.click(function(){
-        startCoundDown(stopTime);
-        inRunning();
+        stopAlarmEvents();
+        var seconds = timeString.toSeconds(stopTime);
+        setMiliSecondsElIerationCount(seconds);
+        timedown.start(seconds, stopEvent);
+        showStopTime(timeString.fromSeconds(timedown.getRemainedOneSeconds()));
+        setMilliSecondsAnimationPlayState("running");
+        showButtonsInRunning();
     });
     continueEl.click(function(){
-        continueCoundDown(stopTime);
-        inRunning();
+        stopAlarmEvents();
+        timedown.continue();
+        showStopTime(timeString.fromSeconds(timedown.getRemainedOneSeconds()));
+        setMilliSecondsAnimationPlayState("running");
+        showButtonsInRunning();
     });
     pauseEl.click(function(){
-        // subtractedPassedSeconds = computerTotalSubtractedPassedSeconds(startTime)-stopSeconds;
-        // clearTimeout(endTimeout);
         timedown.pause();
-        setAnimationPlayState("paused");
-        inPause();
+        setMilliSecondsAnimationPlayState("paused");
+        showButtonsInPaused();
     });
-    clearEl.click(function(){
+    stopEl.click(function(){
         stopAlarmEvents();
-        timedown.end();
+        timedown.stop();
         refreshStopTimeAndStatus(stopTime);
-        inStop();
+        ShowButtonsInStopped();
     });
     var getValidatedTime = function (timeStr) {
         var timeInt = parseInt10(timeStr);
@@ -286,10 +275,10 @@ colinM.tomatoClock = (function () {
     }
     self.main = function () {
         if (getStopTimeFromURL()!=NONE) {
-            stopTime=getFullStopTime(getStopTimeFromURL());
+            stopTime=getStopTimeFromURL();
         };
         refreshStopTimeAndStatus(stopTime);
-        inStop();
+        ShowButtonsInStopped();
     }
     return self;
 }());

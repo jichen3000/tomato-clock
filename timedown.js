@@ -1,23 +1,20 @@
 var colinM = colinM || {};
 colinM.timedown = (function () {
-    var totalMilliSeconds = 0,
+    var totalSeconds = 0,
         startTimeList = [],
         pauseTimeList = [],
-        endFun,
+        stopFun,
         timeout,
         status = "none",
         self = colinM.timedown || {};
     var nowTime = function () {
       return new Date().getTime();
     };
-    var milliSecondsToSeconds = function (milliSeconds) {
-        return Math.floor(milliSeconds/1000);
-    };
     self.init = function (seconds, fun) {
         var that = this;
-        totalMilliSeconds = seconds * 1000;
-        endFun = function () {
-            that.end();
+        totalSeconds = seconds;
+        stopFun = function () {
+            that.stop();
             fun.call(this);
         };
         startTimeList = [];
@@ -25,8 +22,11 @@ colinM.timedown = (function () {
         timeout = undefined;
         return this;
     };
+    self.getTotalMilliSeconds = function  () {
+        return totalSeconds * 1000;
+    };
     self.getTotalSeconds = function () {
-        return milliSecondsToSeconds(totalMilliSeconds);
+        return totalSeconds;
     };
     self.getPassedMilliSeconds = function () {
         var tmppauseTimeList = pauseTimeList.slice(0); 
@@ -40,23 +40,34 @@ colinM.timedown = (function () {
         return result;
     };
     self.getPassedSeconds = function () {
-        return milliSecondsToSeconds(this.getPassedMilliSeconds());
+        return Math.floor(this.getPassedMilliSeconds()/1000);
     };
+    self.getPassedOneSeconds = function () {
+        return this.getPassedSeconds()+1;
+    }
     self.getRemainedMilliSeconds = function () {
-        return totalMilliSeconds - this.getPassedMilliSeconds();
+        return this.getTotalMilliSeconds() - this.getPassedMilliSeconds();
     };
     self.getRemainedSeconds = function () {
-        return milliSecondsToSeconds(this.getRemainedMilliSeconds());
+        // notice, this will use math ceil, it is reveres with the getPassedSeconds
+        // return this.getTotalSeconds() - this.getPassedSeconds()-1;
+        return Math.ceil(this.getRemainedMilliSeconds()/1000);
+    };
+    self.getRemainedOneSeconds = function () {
+        return this.getRemainedSeconds()-1;
     };
     self.getStatus = function () {
         return status;
     };
+    self.isInRunning = function () {
+        return status === "running";
+    }
     self.start = function () {
         if(arguments.length === 2){
             this.init(arguments[0],arguments[1]);
         };
         startTimeList.push(nowTime());
-        timeout = setTimeout(endFun, totalMilliSeconds);
+        timeout = setTimeout(stopFun, this.getTotalMilliSeconds());
         status = "running";
         return this;
     };
@@ -66,21 +77,24 @@ colinM.timedown = (function () {
         status = "paused";
         return this;
     };
-    self.resume = function () {
+    self.continue = function () {
         startTimeList.push(nowTime());
-        timeout = setTimeout(endFun, this.getRemainedMilliSeconds());
+        timeout = setTimeout(stopFun, this.getRemainedMilliSeconds());
         status = "running";
         return this;
     };
-    self.end = function () {
+    self.stop = function () {
         this.pause();
-        status = "end";
+        status = "stopped";
         return this;
     };
     self.toString = function () {
         return " status: "+ status + 
               " totalSeconds: "+ this.getTotalSeconds() +
               " getPassedSeconds: "+ this.getPassedSeconds() +
+              " getRemainedSeconds: "+ this.getRemainedSeconds() +
+              " getPassedOneSeconds: "+ this.getPassedOneSeconds() +
+              " getRemainedOneSeconds: "+ this.getRemainedOneSeconds() +
               " startTimeList: "+ startTimeList +
               " pauseTimeList: "+ pauseTimeList;
     };
