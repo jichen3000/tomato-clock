@@ -52,6 +52,31 @@ colinM.commons = (function () {
     return self;    
 }());
 
+colinM.littleAop = (function () {
+    var self = {},
+        aopFunNames = ['after', 'before', 'round'];
+    var isSelfFuntion = function (obj, funName) {
+        return obj.hasOwnProperty(funName) && (typeof obj[funName]) === 'function';
+    };
+    var isNotAopFunction = function (funName) {
+        return aopFunNames.indexOf(funName) < 0;
+    };
+    self.after = function (funName, func) {
+        if ( isSelfFuntion(this, funName) && isNotAopFunction(funName) ){
+            var original = this[funName];
+            this[funName] = function () {
+                result = original.apply(this, arguments);
+                func.apply(this, arguments);
+                return result;
+            };
+            return this[funName];
+        };
+        return false;
+    };
+    return self;
+}());
+
+
 colinM.tomatoClock = {};
 colinM.tomatoClock.timeString = (function () {
     var self = colinM.tomatoClock.timeString || {},
@@ -88,6 +113,7 @@ colinM.tomatoClock.timeString = (function () {
 
     return self; 
 }());
+
 colinM.tomatoClock = (function () {
     var timedown = colinM.timedown,
         timeString = colinM.tomatoClock.timeString,
@@ -197,7 +223,7 @@ colinM.tomatoClock = (function () {
         showStopTime(timeStr);
         self.p("refreshStopTimeAndStatus:"+timeString.toSeconds(timeStr));
     };
-    var stopEvent = function () {
+    self.stopEvent = function () {
         setMilliSecondsAnimationPlayState("paused");
         ShowButtonsInStopped();
         playAlarmEvents(alarmSeconds);
@@ -218,7 +244,7 @@ colinM.tomatoClock = (function () {
         stopAlarmEvents();
         var seconds = timeString.toSeconds(stopTime);
         setMiliSecondsElIerationCount(seconds);
-        timedown.start(seconds, stopEvent);
+        timedown.start(seconds, self.stopEvent);
         showStopTime(timeString.fromSeconds(timedown.getRemainedOneSeconds()));
         setMilliSecondsAnimationPlayState("running");
         showButtonsInRunning();
@@ -283,8 +309,76 @@ colinM.tomatoClock = (function () {
     return self;
 }());
 // colinM.tomatoClock.test();
- 
+
+colinM.tomatoClock.clientDb = (function () {
+    _.templateSettings = {
+        interpolate : /\#\{(.+?)\}/g
+    };
+    var tomatoClock = _.extend(colinM.tomatoClock, colinM.littleAop)
+        self = {};
+    var ME = 'ME',
+        TABLE_NAME = 'TC',
+        ROW_TEMPLATE = _.template(
+            "<tr><td>#{ID}</td><td>#{passedSeconds}</td><td>#{updateTimeInt}</td></tr>"),
+        NAME_SPERATE = '-';
+    var getNowInt = function () {
+        return new Date().getTime();
+    };
+    var generateTcKey = function (nowInt,fieldName) {
+        return [TABLE_NAME, ME, nowInt, fieldName].join(NAME_SPERATE);
+    };
+    var isTcKey = function (keyFields) {
+        return (keyFields[0] === TABLE_NAME && 
+            keyFields[1] === ME);  
+    };
+    var getTcId = function (keyFields) {
+        return keyFields[2];
+    };
+    var getTcFieldName = function (keyFields) {
+        return keyFields[3];
+    };
+    var saveOneTc = function (passedSeconds) {
+        var nowInt = getNowInt();
+        localStorage[generateTcKey(nowInt, "updateTimeInt")] = nowInt;
+        localStorage[generateTcKey(nowInt, "passedSeconds")] = passedSeconds;
+        return {ID : nowInt, "passedSeconds" : passedSeconds, "updateTimeInt" : nowInt};
+    };
+    var loadAllTc = function () {
+        allHash = _.foldl(Object.keys(localStorage), function (memo, key) {
+            var keyFields = key.split(NAME_SPERATE);
+            if (isTcKey(keyFields)) {
+                var tcId = getTcId(keyFields);
+                var fieldName = getTcFieldName(keyFields);
+                memo[tcId] = memo[tcId] || {ID : tcId};
+                memo[tcId][fieldName] = localStorage[key];
+            };
+            return memo;
+        }, {});
+        return _.map(Object.keys(allHash).sort(), function (key) {
+            return allHash[key];
+        });
+    };
+    var renderOneOrder = function (obj) {
+        var rowStr = ROW_TEMPLATE(obj);
+        $('table#tomato-clock-records > tbody:last').append(rowStr);
+    };
+    tomatoClock.after('stopEvent', function () {
+        saveOneTc(colinM.timedown.getPassedSeconds());
+        console.log(colinM.timedown.getPassedSeconds());
+    });
+    self.main = function () {
+        var all = loadAllTc();
+        _.map(all, function (curTc) {
+            renderOneOrder(curTc);
+        });
+        console.log("all:");
+        console.log(all);
+    };
+    return self;
+}());
 
 $(function(){
     colinM.tomatoClock.main();
+    colinM.tomatoClock.clientDb.main();
+
 });

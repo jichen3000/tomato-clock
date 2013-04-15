@@ -16,6 +16,9 @@
     .some-margin-bottom{
         margin-bottom: 5px;
     }
+    #title{
+        font-family: digital, arial, verdana;
+    }
     #control-group{
     }
     #stop-minutes{
@@ -70,7 +73,7 @@
     <div class="navbar navbar-fixed-top navbar-inverse">
       <div class="navbar-inner">
         <div class="container">
-            <a class="brand" href="./index.html">Tomato Clock</a>
+            <a id="title" class="brand" href="./index.html">Tomato Clock</a>
         </div>
       </div>
     </div>
@@ -124,9 +127,22 @@
         <p id="messages">msg</p>
         <button id="test">test</button>
     </div>
+    <table id="tomato-clock-records">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Span</th>
+                <th>End Time</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>       
 </body>
     <script src="jquery-1.7.2.min.js" type="text/javascript"></script>
     <script src="bootstrap.min.js" type="text/javascript"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"
+         type="text/javascript"></script>
     <script src="timedown.js" type="text/javascript"></script>
     <script src="tomatoclock.js" type="text/javascript"></script>
 
