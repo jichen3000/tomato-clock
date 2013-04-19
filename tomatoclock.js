@@ -141,11 +141,6 @@ colinM.tomatoClock = (function () {
     self.test = function () {
         pl("test".repeat(5));  
     };
-    var showButtons = function () {
-        if(timedown.isInRunning()){
-            
-        }
-    };
     var showButtonsInRunning = function () {
         startEl.hide();
         pauseEl.show();
@@ -223,12 +218,18 @@ colinM.tomatoClock = (function () {
         showStopTime(timeStr);
         self.p("refreshStopTimeAndStatus:"+timeString.toSeconds(timeStr));
     };
-    self.stopEvent = function () {
+    self.endEvent = function () {
         setMilliSecondsAnimationPlayState("paused");
         ShowButtonsInStopped();
         playAlarmEvents(alarmSeconds);
         refreshStopTimeAndStatus(stopTime);
         self.p("end! seconds:"+timedown.getPassedSeconds());
+    };
+    self.stopEvent = function () {
+        stopAlarmEvents();
+        timedown.stop();
+        refreshStopTimeAndStatus(stopTime);
+        ShowButtonsInStopped();
     };
     window.onfocus = function () {
         if(timedown.isInRunning()){
@@ -238,34 +239,31 @@ colinM.tomatoClock = (function () {
     miliSecondsEL.on('webkitAnimationIteration', function(e) {
         showStopTime(timeString.fromSeconds(timedown.getRemainedOneSeconds()));
         // for test
-        self.p("passedSeconds:"+timedown.getPassedOneSeconds());
+        self.p("passedSeconds:"+timedown.getPassedSeconds());
     });
-    startEl.click(function(){
+    startEl.click(function () {
         stopAlarmEvents();
         var seconds = timeString.toSeconds(stopTime);
         setMiliSecondsElIerationCount(seconds);
-        timedown.start(seconds, self.stopEvent);
+        timedown.start(seconds, self.endEvent);
         showStopTime(timeString.fromSeconds(timedown.getRemainedOneSeconds()));
         setMilliSecondsAnimationPlayState("running");
         showButtonsInRunning();
     });
-    continueEl.click(function(){
+    continueEl.click(function () {
         stopAlarmEvents();
         timedown.continue();
         showStopTime(timeString.fromSeconds(timedown.getRemainedOneSeconds()));
         setMilliSecondsAnimationPlayState("running");
         showButtonsInRunning();
     });
-    pauseEl.click(function(){
+    pauseEl.click(function () {
         timedown.pause();
         setMilliSecondsAnimationPlayState("paused");
         showButtonsInPaused();
     });
-    stopEl.click(function(){
-        stopAlarmEvents();
-        timedown.stop();
-        refreshStopTimeAndStatus(stopTime);
-        ShowButtonsInStopped();
+    stopEl.click(function () {
+        self.stopEvent();
     });
     var getValidatedTime = function (timeStr) {
         var timeInt = parseInt10(timeStr);
@@ -319,7 +317,7 @@ colinM.tomatoClock.clientDb = (function () {
     var ME = 'ME',
         TABLE_NAME = 'TC',
         ROW_TEMPLATE = _.template(
-            "<tr><td>#{ID}</td><td>#{passedSeconds}</td><td>#{updateTimeInt}</td></tr>"),
+            "<tr><td>#{ID}</td><td>#{passedSeconds}</td><td>#{updateTimeInt}</td><td>#{isInterrupted}</td></tr>"),
         NAME_SPERATE = '-';
     var getNowInt = function () {
         return new Date().getTime();
@@ -337,14 +335,18 @@ colinM.tomatoClock.clientDb = (function () {
     var getTcFieldName = function (keyFields) {
         return keyFields[3];
     };
-    var saveOneTc = function (passedSeconds) {
+    var saveOneTc = function (passedSeconds, originalSeconds) {
         var nowInt = getNowInt();
         localStorage[generateTcKey(nowInt, "updateTimeInt")] = nowInt;
         localStorage[generateTcKey(nowInt, "passedSeconds")] = passedSeconds;
-        return {ID : nowInt, "passedSeconds" : passedSeconds, "updateTimeInt" : nowInt};
+        originalSeconds && (localStorage[generateTcKey(nowInt, "originalSeconds")] = originalSeconds);
+
+        var newTc = {ID : nowInt, "passedSeconds" : passedSeconds, "updateTimeInt" : nowInt};
+        originalSeconds && (newTc["originalSeconds"] = originalSeconds);
+        return newTc;
     };
-    var loadAllTc = function () {
-        allHash = _.foldl(Object.keys(localStorage), function (memo, key) {
+    var getAllTcHash = function () {
+        return _.foldl(Object.keys(localStorage), function (memo, key) {
             var keyFields = key.split(NAME_SPERATE);
             if (isTcKey(keyFields)) {
                 var tcId = getTcId(keyFields);
@@ -354,22 +356,41 @@ colinM.tomatoClock.clientDb = (function () {
             };
             return memo;
         }, {});
-        return _.map(Object.keys(allHash).sort(), function (key) {
+    };
+    var getTcListLatest = function (listNumber) {
+        allHash = getAllTcHash();
+        allListLatest =  _.map(Object.keys(allHash).sort(function (a, b) {
+            return b - a;
+        }), function (key) {
             return allHash[key];
         });
+        if(listNumber){
+            return allListLatest.slice(0, listNumber);
+        };
+        return allListLatest;
     };
-    var renderOneOrder = function (obj) {
-        var rowStr = ROW_TEMPLATE(obj);
-        $('table#tomato-clock-records > tbody:last').append(rowStr);
+    var renderOneTc = function (obj, insertFunName) {
+        var tmpObj = _.extend({},obj);
+        tmpObj['isInterrupted'] = tmpObj['originalSeconds'] ? 'yes' : 'No';
+        var rowStr = ROW_TEMPLATE(tmpObj);
+        var insertFunName = insertFunName || 'append';
+        $('table#tomato-clock-records > tbody')[insertFunName](rowStr);
+        return tmpObj;
     };
+    tomatoClock.after('endEvent', function () {
+        var curTc = saveOneTc(colinM.timedown.getPassedSeconds());
+        renderOneTc(curTc, 'prepend');
+        console.log(colinM.timedown.getPassedSeconds());
+    });
     tomatoClock.after('stopEvent', function () {
-        saveOneTc(colinM.timedown.getPassedSeconds());
+        var curTc = saveOneTc(colinM.timedown.getPassedSeconds(),colinM.timedown.getTotalSeconds());
+        renderOneTc(curTc, 'prepend');
         console.log(colinM.timedown.getPassedSeconds());
     });
     self.main = function () {
-        var all = loadAllTc();
+        var all = getTcListLatest(5);
         _.map(all, function (curTc) {
-            renderOneOrder(curTc);
+            renderOneTc(curTc);
         });
         console.log("all:");
         console.log(all);

@@ -40,28 +40,25 @@ colinM.timedown = (function () {
         return result;
     };
     self.getPassedSeconds = function () {
-        return Math.floor(this.getPassedMilliSeconds()/1000);
+        return Math.round(this.getPassedMilliSeconds()/1000);
     };
-    self.getPassedOneSeconds = function () {
-        return this.getPassedSeconds()+1;
-    }
     self.getRemainedMilliSeconds = function () {
         return this.getTotalMilliSeconds() - this.getPassedMilliSeconds();
     };
     self.getRemainedSeconds = function () {
-        // notice, this will use math ceil, it is reveres with the getPassedSeconds
-        // return this.getTotalSeconds() - this.getPassedSeconds()-1;
-        return Math.ceil(this.getRemainedMilliSeconds()/1000);
+        return Math.round(this.getRemainedMilliSeconds()/1000);
     };
     self.getRemainedOneSeconds = function () {
-        return this.getRemainedSeconds()-1;
+        // notice, this will use math ceil, it is reveres with the getPassedSeconds
+        // return this.getTotalSeconds() - this.getPassedSeconds()-1;
+        return Math.ceil(this.getRemainedMilliSeconds()/1000)-1;
     };
     self.getStatus = function () {
         return status;
     };
     self.isInRunning = function () {
         return status === "running";
-    }
+    };
     self.start = function () {
         if(arguments.length === 2){
             this.init(arguments[0],arguments[1]);
@@ -93,7 +90,6 @@ colinM.timedown = (function () {
               " totalSeconds: "+ this.getTotalSeconds() +
               " getPassedSeconds: "+ this.getPassedSeconds() +
               " getRemainedSeconds: "+ this.getRemainedSeconds() +
-              " getPassedOneSeconds: "+ this.getPassedOneSeconds() +
               " getRemainedOneSeconds: "+ this.getRemainedOneSeconds() +
               " startTimeList: "+ startTimeList +
               " pauseTimeList: "+ pauseTimeList;
