@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 9 2013-04-14
+# 10 2013-04-21
 /tomato-clock/DS-DIGI.TTF
 /tomato-clock/bootstrap.css
 /tomato-clock/bootstrap.min.js
@@ -8,4 +8,4 @@ CACHE MANIFEST
 /tomato-clock/jquery-1.7.2.min.js
 /tomato-clock/tomatoclock.js
 /tomato-clock/timedown.js
-http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js
+/tomato-clock/underscore.min.js

@@ -6,7 +6,7 @@
     <link rel="stylesheet" type="text/css" href="bootstrap.css">
     <style type="text/css">
     #content{
-        width: 200px;
+        /*width: 200px;*/
     }
     #clock{
         height: 50px;
@@ -22,7 +22,7 @@
     #control-group{
     }
     #stop-minutes{
-        width: 120px;
+        /*width: 120px;*/
         margin-bottom: 0px;
     }
     .double-cell{
@@ -62,6 +62,12 @@
         100% {background: #b22222;} 
     }
 
+    table#tomato-clock-records tr td:first-child { 
+      display: none; 
+    }
+    table#tomato-clock-records tr th:first-child { 
+      display: none; 
+    }
     @font-face {
         font-family: 'digital';
         src: url('DS-DIGI.TTF');
@@ -87,7 +93,7 @@
         <h1>Tomato Clock</h1>
       </div>
     </div>  
-    <div id="content" class="container">
+    <div id="content" class="offset6 span4">
         <div id="clock">
             <div class="cell single-cell">
                 <div class="ten-minutes">0</div>
@@ -117,9 +123,10 @@
             <button class="btn btn-success short-key" value="48">48 mins</button>
             <button class="btn btn-success short-key" value="25">25</button>
             <button class="btn btn-success short-key" value="30">30</button>
+            <button class="btn btn-success short-key" value="20">20</button>
         </div>
         <div id="set-time-group">
-            <input type="text" id="stop-minutes" class="" placeholder="Minutes"/>
+            <input type="text" id="stop-minutes" class="span2" placeholder="Minutes"/>
             <button id="set" class="btn btn-primary">set</button>
         </div>
     </div>
@@ -127,24 +134,25 @@
         <p id="messages">msg</p>
         <button id="test">test</button>
     </div>
-    <table id="tomato-clock-records">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Span</th>
-                <th>End Time</th>
-                <th>Is Interrupted</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>       
+    <div id="mytable" class="span4 offset6">
+        <table id="tomato-clock-records" class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Span</th>
+                    <th>End Time</th>
+                    <th>Finished</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>       
+    </div>
 </body>
-    <script src="jquery-1.7.2.min.js" type="text/javascript"></script>
-    <script src="bootstrap.min.js" type="text/javascript"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"
-         type="text/javascript"></script>
-    <script src="timedown.js" type="text/javascript"></script>
-    <script src="tomatoclock.js" type="text/javascript"></script>
+    <script src="jquery-1.7.2.min.js"></script>
+    <script src="bootstrap.min.js"></script>
+    <script src="underscore.min.js"></script>
+    <script src="timedown.js"></script>
+    <script src="tomatoclock.js"></script>
 
 </html>

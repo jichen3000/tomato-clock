@@ -109,6 +109,32 @@ colinM.tomatoClock.timeString = (function () {
         };
         return leftMinutes.toString().rjust(2,"0") + leftSeconds.toString().rjust(2,"0");
     };
+    self.ToHumanMinSecs = function (seconds) {
+        var parseSeconds = seconds % 60;
+        var parseMinutes = (seconds - parseSeconds) / 60;
+        var result = parseMinutes.toString() + "m"
+        if(parseSeconds > 0){
+          result += parseSeconds+"s";
+        };
+        return result;
+    };
+    self.toHumanDateWithoutTime = function (aDate) {
+      // not change now
+      var now = new Date(Date.now());
+      var dateEndIndex = 10;
+      if(aDate.toJSON().slice(0,dateEndIndex) === now.toJSON().slice(0,dateEndIndex)){
+        return "Today";
+      };
+      now.setDate(now.getDate() - 1);
+      if(aDate.toJSON().slice(0,dateEndIndex) === now.toJSON().slice(0,dateEndIndex)){
+        return "Yesterday";
+      };
+      return aDate.toString().slice(4,15);
+    }
+    self.toHumanDateWithTime = function (timeInt) {
+      var aDate = new Date(timeInt);
+      return self.toHumanDateWithoutTime(aDate) +" "+ aDate.toTimeString().slice(0,5);
+    };
 
 
     return self; 
@@ -312,13 +338,43 @@ colinM.tomatoClock.clientDb = (function () {
     _.templateSettings = {
         interpolate : /\#\{(.+?)\}/g
     };
-    var tomatoClock = _.extend(colinM.tomatoClock, colinM.littleAop)
+    var tomatoClock = _.extend(colinM.tomatoClock, colinM.littleAop),
+        timeString = colinM.tomatoClock.timeString,
         self = {};
     var ME = 'ME',
         TABLE_NAME = 'TC',
         ROW_TEMPLATE = _.template(
-            "<tr><td>#{ID}</td><td>#{passedSeconds}</td><td>#{updateTimeInt}</td><td>#{isInterrupted}</td></tr>"),
+            "<tr class=#{styleHuman}  style='display: none;'><td>#{ID}</td><td>#{passedTimeHuman}</td>"+
+            "<td><time class='human-read' timeInt='#{ID}'>#{endTimeHuman}</time></td><td>#{finishedHuman}</td></tr>"),
         NAME_SPERATE = '-';
+    var renderOneTc = function (obj, insertFunName) {
+        var renderTc = generateRenderTc(obj)
+        var newRow = $(ROW_TEMPLATE(renderTc));
+        var insertFunName = insertFunName || 'append';
+        $('table#tomato-clock-records > tbody')[insertFunName](newRow);
+        newRow.show('slow');
+        return renderTc;
+    };
+    var generateRenderTc = function (obj){
+        var renderTc = _.extend({},obj);
+        renderTc['finishedHuman'] = obj['originalSeconds'] ? 'NO' : 'YES';
+        renderTc['styleHuman'] = obj['originalSeconds'] ? 'error' : 'success';
+        renderTc['endTimeHuman'] = timeString.toHumanDateWithTime(parseInt10(obj['ID']));
+        renderTc['passedTimeHuman'] = timeString.ToHumanMinSecs(obj['passedSeconds']);
+        return renderTc;
+    };
+    var keepFixTcCount = function (tcCount, insertFunName) {
+        var allTc = $('table#tomato-clock-records > tbody > tr');
+        var insertFunName = insertFunName || 'append';
+        var lastOrFirst = {'prepend':':last',
+                          'append':':first'}[insertFunName];
+        if(allTc.size() > tcCount){
+          var removeTc = allTc.filter(lastOrFirst);
+          removeTc.remove();
+          return removeTc;
+        };
+        return 0;
+    };
     var getNowInt = function () {
         return new Date().getTime();
     };
@@ -336,12 +392,12 @@ colinM.tomatoClock.clientDb = (function () {
         return keyFields[3];
     };
     var saveOneTc = function (passedSeconds, originalSeconds) {
-        var nowInt = getNowInt();
-        localStorage[generateTcKey(nowInt, "updateTimeInt")] = nowInt;
-        localStorage[generateTcKey(nowInt, "passedSeconds")] = passedSeconds;
-        originalSeconds && (localStorage[generateTcKey(nowInt, "originalSeconds")] = originalSeconds);
+        var curId = getNowInt();
+        localStorage[generateTcKey(curId, "updateTimeInt")] = curId;
+        localStorage[generateTcKey(curId, "passedSeconds")] = passedSeconds;
+        originalSeconds && (localStorage[generateTcKey(curId, "originalSeconds")] = originalSeconds);
 
-        var newTc = {ID : nowInt, "passedSeconds" : passedSeconds, "updateTimeInt" : nowInt};
+        var newTc = {ID : curId, "passedSeconds" : passedSeconds, "updateTimeInt" : curId};
         originalSeconds && (newTc["originalSeconds"] = originalSeconds);
         return newTc;
     };
@@ -357,7 +413,7 @@ colinM.tomatoClock.clientDb = (function () {
             return memo;
         }, {});
     };
-    var getTcListLatest = function (listNumber) {
+    self.getTcListLatest = function (listNumber) {
         allHash = getAllTcHash();
         allListLatest =  _.map(Object.keys(allHash).sort(function (a, b) {
             return b - a;
@@ -369,32 +425,66 @@ colinM.tomatoClock.clientDb = (function () {
         };
         return allListLatest;
     };
-    var renderOneTc = function (obj, insertFunName) {
-        var tmpObj = _.extend({},obj);
-        tmpObj['isInterrupted'] = tmpObj['originalSeconds'] ? 'yes' : 'No';
-        var rowStr = ROW_TEMPLATE(tmpObj);
-        var insertFunName = insertFunName || 'append';
-        $('table#tomato-clock-records > tbody')[insertFunName](rowStr);
-        return tmpObj;
+    // tc:
+    // {
+    //     ID: "1366421945220",
+    //     passedSeconds: "1500",
+    //     updateTimeInt: "1366431014979",
+    //     originalSeconds: "1800"
+    // }
+    self.deleteTc = function (tcObj) {
+        var fields = _.filter(Object.keys(tcObj), function (curKey) {
+            return curKey !== 'ID';
+        });
+        _.map(fields, function (curField) {
+            delete localStorage[generateTcKey(tcObj['ID'], curField)];
+        });
+        return tcObj;
+    };
+    var refreshHumanReadTime = function () {
+      $("time.human-read").each(function (index) {
+        this.innerText = timeString.toHumanDateWithTime(parseInt($(this).attr("timeInt")));
+      });
     };
     tomatoClock.after('endEvent', function () {
         var curTc = saveOneTc(colinM.timedown.getPassedSeconds());
         renderOneTc(curTc, 'prepend');
-        console.log(colinM.timedown.getPassedSeconds());
+        keepFixTcCount(5, 'prepend');
     });
     tomatoClock.after('stopEvent', function () {
         var curTc = saveOneTc(colinM.timedown.getPassedSeconds(),colinM.timedown.getTotalSeconds());
         renderOneTc(curTc, 'prepend');
-        console.log(colinM.timedown.getPassedSeconds());
+        keepFixTcCount(5, 'prepend');
     });
     self.main = function () {
-        var all = getTcListLatest(5);
+        var all = self.getTcListLatest(5);
         _.map(all, function (curTc) {
             renderOneTc(curTc);
         });
         console.log("all:");
         console.log(all);
     };
+    return self;
+}());
+colinM.tomatoClock.clientDb.changes = (function () {
+    var self = {},
+        getTcListLatest = colinM.tomatoClock.clientDb.getTcListLatest,
+        deleteTc = colinM.tomatoClock.clientDb.deleteTc,
+        generateTcKey = colinM.tomatoClock.clientDb.generateTcKey
+        parseInt10 = colinM.commons.parseInt10;
+
+    self.deleteSmallSpan = function (spanThreshold) {
+        var deleteList = _.map(getTcListLatest(), function (curTc) {
+            if(parseInt10(curTc['passedSeconds']) < spanThreshold){
+                return deleteTc(curTc);
+            };
+            return false;
+        });
+        return _.filter(deleteList, function (item) {
+            return item;
+        });
+    };
+
     return self;
 }());
 
