@@ -152,7 +152,8 @@ colinM.tomatoClock = (function () {
     };
     var getStopTimeFromURL = function () {
         if(window.location.hash !== ""){
-            return timeString.toFullTimeStr(timeString.getValidatedTime(window.location.hash.substring(1)));
+            return timeString.toFullTimeStr(
+                timeString.getValidatedTime(window.location.hash.substring(1)));
         };
         return NONE;
     };
@@ -267,6 +268,7 @@ colinM.tomatoClock.clientDb = (function () {
     };
     var tomatoClock = _.extend(colinM.tomatoClock, colinM.littleAop),
         timeString = colinM.tomatoClock.timeString,
+        parseInt10 = colinM.commons.parseInt10,
         self = {};
     var ME = 'ME',
         TABLE_NAME = 'TC',
@@ -296,9 +298,9 @@ colinM.tomatoClock.clientDb = (function () {
         var lastOrFirst = {'prepend':':last',
                           'append':':first'}[insertFunName];
         if(allTc.size() > tcCount){
-          var removeTc = allTc.filter(lastOrFirst);
-          removeTc.remove();
-          return removeTc;
+            var removeTc = allTc.filter(lastOrFirst);
+            removeTc.remove();
+            return removeTc;
         };
         return 0;
     };
@@ -359,19 +361,27 @@ colinM.tomatoClock.clientDb = (function () {
     //     updateTimeInt: "1366431014979",
     //     originalSeconds: "1800"
     // }
-    self.deleteTc = function (tcObj) {
-        var fields = _.filter(Object.keys(tcObj), function (curKey) {
+    var getTcFieldNamesExceptId = function (tcObj) {
+        return _.filter(Object.keys(tcObj), function (curKey) {
             return curKey !== 'ID';
         });
-        _.map(fields, function (curField) {
+    };
+    self.deleteTcObj = function (tcObj) {
+        _.map(getTcFieldNamesExceptId(tcObj), function (curField) {
             delete localStorage[generateTcKey(tcObj['ID'], curField)];
         });
         return tcObj;
     };
+    self.saveTcObj = function (tcObj) {
+        _.map(getTcFieldNamesExceptId(tcObj), function (curField) {
+            localStorage[generateTcKey(tcObj['ID'], curField)] = tcObj[curField];
+        });
+        return tcObj;
+    };
     var refreshHumanReadTime = function () {
-      $("time.human-read").each(function (index) {
-        this.innerText = timeString.toHumanDateWithTime(parseInt($(this).attr("timeInt")));
-      });
+        $("time.human-read").each(function (index) {
+            this.innerText = timeString.toHumanDateWithTime(parseInt($(this).attr("timeInt")));
+        });
     };
     tomatoClock.after('endEvent', function () {
         var curTc = saveOneTc(colinM.timedown.getPassedSeconds());
@@ -396,14 +406,13 @@ colinM.tomatoClock.clientDb = (function () {
 colinM.tomatoClock.clientDb.changes = (function () {
     var self = {},
         getTcListLatest = colinM.tomatoClock.clientDb.getTcListLatest,
-        deleteTc = colinM.tomatoClock.clientDb.deleteTc,
-        generateTcKey = colinM.tomatoClock.clientDb.generateTcKey
-        parseInt10 = colinM.commons.parseInt10;
+        deleteTcObj = colinM.tomatoClock.clientDb.deleteTcObj,
+        saveTcObj = colinM.tomatoClock.clientDb.saveTcObj;
 
-    self.deleteLittleSpan = function (spanThresholdSeconds) {
+    self.deleteLittleSpanTcs = function (spanThresholdSeconds) {
         var deleteList = _.map(getTcListLatest(), function (curTc) {
             if(parseInt10(curTc['passedSeconds']) < spanThresholdSeconds){
-                return deleteTc(curTc);
+                return deleteTcObj(curTc);
             };
             return false;
         });
@@ -412,9 +421,19 @@ colinM.tomatoClock.clientDb.changes = (function () {
         });
     };
 
+    self.exportAllTcToConsole = function () {
+        return JSON.stringify(getTcListLatest());
+    };
+
+    self.saveTcList = function (tcList) {
+        return _.map(tcList, function (curTc) {
+            return saveTcObj(curTc);
+        });
+    };
+
     return self;
 }());
-var deleteLittleSpan = colinM.tomatoClock.clientDb.changes.deleteLittleSpan;
+_.extend(this, colinM.tomatoClock.clientDb.changes);
 
 $(function(){
     colinM.tomatoClock.main();
