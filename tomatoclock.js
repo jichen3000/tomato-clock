@@ -1,132 +1,55 @@
 var colinM = colinM || {};
-colinM.commons = (function () {
-    var stringProto = String.prototype,
-        self = colinM.commons || {};
-    // This function copy from functional.js 
-    Function.prototype.rcurry = function() {
-        var slice = Array.prototype.slice;
-        var fun = this;
-        var args = slice.call(arguments);
-        return function() {
-            return fun.apply(this, slice.call(arguments).concat(args));
-        };
-    };
-    self.parseInt10 = parseInt.rcurry(10);
-
-    // These functions even could work outside colinM.tomatoClock.
-    // "Ruby".rjust( 10 );       // "      Ruby"
-    // "Ruby".ljust( 10 );       // "Ruby      "
-    // "Ruby".center( 10, "+" ); // "+++Ruby+++"
-    stringProto.repeat = function( num ) {
-        for( var i = 0, buf = ""; i < num; i++ ) buf += this;
-        return buf;
-    }; 
-    stringProto.ljust = function( width, padding ) {
-        padding = padding || " ";
-        padding = padding.substr( 0, 1 );
-        if( this.length < width )
-            return this + padding.repeat( width - this.length );
-        else
-            return this;
-    };
-    stringProto.rjust = function( width, padding ) {
-        padding = padding || " ";
-        padding = padding.substr( 0, 1 );
-        if( this.length < width )
-            return padding.repeat( width - this.length ) + this;
-        else
-            return this;
-    };
-    stringProto.center = function( width, padding ) {
-        padding = padding || " ";
-        padding = padding.substr( 0, 1 );
-        if( this.length < width ) {
-            var len     = width - this.length;
-            var remain  = ( len % 2 == 0 ) ? "" : padding;
-            var pads    = padding.repeat( parseInt10( len / 2 ) );
-            return pads + this + pads + remain;
-        }
-        else
-            return this;
-    };
-    return self;    
-}());
-
-colinM.littleAop = (function () {
-    var self = {},
-        aopFunNames = ['after', 'before', 'round'];
-    var isSelfFuntion = function (obj, funName) {
-        return obj.hasOwnProperty(funName) && (typeof obj[funName]) === 'function';
-    };
-    var isNotAopFunction = function (funName) {
-        return aopFunNames.indexOf(funName) < 0;
-    };
-    self.after = function (funName, func) {
-        if ( isSelfFuntion(this, funName) && isNotAopFunction(funName) ){
-            var original = this[funName];
-            this[funName] = function () {
-                result = original.apply(this, arguments);
-                func.apply(this, arguments);
-                return result;
-            };
-            return this[funName];
-        };
-        return false;
-    };
-    return self;
-}());
 
 
 colinM.tomatoClock = {};
 colinM.tomatoClock.timeString = (function () {
     var self = colinM.tomatoClock.timeString || {},
         parseInt10 = colinM.commons.parseInt10;
-    self.ljust4 = function (timeStr) {
-        return timeStr.ljust(4,"0");
+    self.toFullTimeStr = function (timeStr) {
+        if(timeStr.length === 1){
+            return "0"+timeStr+"00";
+        };
+        return timeStr.ljust(4,"0"); 
     };
-    self.getMinutesOnly = function (timeStr) {
+    self.toMinutePart = function (timeStr) {
         return timeStr.substr(0,2);
     };
-    self.getSecondsOnly = function (timeStr) {
-        return timeStr.substr(2,2);
+    self.toSecondPart = function (timeStr) {
+        var result = timeStr.substr(2,2);
+        return result==="" ? "0" : result;
     };
     self.toSeconds = function (timeStr) {
-        return parseInt10(this.getMinutesOnly(timeStr))*60+parseInt10(this.getSecondsOnly(timeStr));
+        return parseInt10(this.toMinutePart(timeStr))*60+parseInt10(this.toSecondPart(timeStr));
+    };
+    self.toMinSecHash = function (seconds) {
+        var secPart = seconds % 60;
+        return {min: (seconds - secPart) / 60,
+                sec : secPart};
     };
     self.fromSeconds = function (seconds) {
-        var parseSeconds = seconds % 60;
-        var parseMinutes = (seconds - parseSeconds) / 60;
-        return parseMinutes.toString().rjust(2,"0") + parseSeconds.toString().rjust(2,"0");
-    };
-    self.computerLeftTimeStr = function (timeStr,seconds) {
-        var parseSeconds = seconds % 60;
-        var parseMinutes = (seconds - parseSeconds) / 60;
-        var leftSeconds = parseInt10(this.getSecondsOnly(timeStr))-parseSeconds;
-        var leftMinutes = parseInt10(this.getMinutesOnly(timeStr))-parseMinutes;
-        if (leftSeconds < 0) {
-            leftSeconds = 60 + leftSeconds;
-            leftMinutes = leftMinutes - 1;
-        };
-        return leftMinutes.toString().rjust(2,"0") + leftSeconds.toString().rjust(2,"0");
+        var minSec = self.toMinSecHash(seconds);
+        return minSec.min.toString().rjust(2,"0") + minSec.sec.toString().rjust(2,"0");
     };
     self.ToHumanMinSecs = function (seconds) {
-        var parseSeconds = seconds % 60;
-        var parseMinutes = (seconds - parseSeconds) / 60;
-        var result = parseMinutes.toString() + "m"
-        if(parseSeconds > 0){
-          result += parseSeconds+"s";
+        var minSec = self.toMinSecHash(seconds);
+        var result = minSec.min.toString() + "m"
+        if(minSec.sec > 0){
+          result += minSec.sec+"s";
         };
         return result;
     };
+    self.isSameLocalDay = function (date1, date2) {
+        return date1.toLocaleDateString() === date2.toLocaleDateString();
+    };
     self.toHumanDateWithoutTime = function (aDate) {
       // not change now
-      var now = new Date(Date.now());
-      var dateEndIndex = 10;
-      if(aDate.toJSON().slice(0,dateEndIndex) === now.toJSON().slice(0,dateEndIndex)){
+      var now = new Date();
+      if(self.isSameLocalDay(aDate, now)){
         return "Today";
       };
-      now.setDate(now.getDate() - 1);
-      if(aDate.toJSON().slice(0,dateEndIndex) === now.toJSON().slice(0,dateEndIndex)){
+      var yesterday = new Date(now);
+      yesterday.setDate(yesterday.getDate() - 1);
+      if(self.isSameLocalDay(aDate, yesterday)){
         return "Yesterday";
       };
       return aDate.toString().slice(4,15);
@@ -134,6 +57,15 @@ colinM.tomatoClock.timeString = (function () {
     self.toHumanDateWithTime = function (timeInt) {
       var aDate = new Date(timeInt);
       return self.toHumanDateWithoutTime(aDate) +" "+ aDate.toTimeString().slice(0,5);
+    };
+    self.getValidatedTime = function (timeStr) {
+        var timeInt = parseInt10(timeStr);
+        if ( isNaN(timeInt) || timeInt <= 0) {
+            return '0001';
+        }else if (timeInt > 9959){
+            return '9959';
+        }
+        return timeStr;
     };
 
 
@@ -220,15 +152,15 @@ colinM.tomatoClock = (function () {
     };
     var getStopTimeFromURL = function () {
         if(window.location.hash !== ""){
-            return timeString.ljust4(getValidatedTime(window.location.hash.substring(1)));
+            return timeString.toFullTimeStr(timeString.getValidatedTime(window.location.hash.substring(1)));
         };
         return NONE;
     };
     var showStopTime = function (timeStr) {
-        $("div.ten-minutes").text(timeString.getMinutesOnly(timeStr)[0]);
-        $("div.minutes").text(timeString.getMinutesOnly(timeStr)[1]);
-        $("div.ten-seconds").text(timeString.getSecondsOnly(timeStr)[0]);
-        $("div.seconds").text(timeString.getSecondsOnly(timeStr)[1]);
+        $("div.ten-minutes").text(timeString.toMinutePart(timeStr)[0]);
+        $("div.minutes").text(timeString.toMinutePart(timeStr)[1]);
+        $("div.ten-seconds").text(timeString.toSecondPart(timeStr)[0]);
+        $("div.seconds").text(timeString.toSecondPart(timeStr)[1]);
     };
     var setMilliSecondsAnimationPlayState = function (state) {
         miliSecondsEL.css("webkitAnimationPlayState",state);
@@ -239,7 +171,7 @@ colinM.tomatoClock = (function () {
         miliSecondsEL.css("webkitAnimationPlayState","paused");
     };
     var refreshStopTimeAndStatus = function (timeStr) {
-        stopTime = timeStr;
+        // stopTime = timeStr;
         miliSecondsEL.css('webkitAnimation', NONE);
         showStopTime(timeStr);
         self.p("refreshStopTimeAndStatus:"+timeString.toSeconds(timeStr));
@@ -291,27 +223,22 @@ colinM.tomatoClock = (function () {
     stopEl.click(function () {
         self.stopEvent();
     });
-    var getValidatedTime = function (timeStr) {
-        var timeInt = parseInt10(timeStr);
-        if ( isNaN(timeInt) || timeInt <= 0) {
-            return '0001';
-        }else if (timeInt > 9959){
-            return '9959';
-        }
-        return timeStr;
-    };
     var changeURL = function (timeStr) {
         window.location.hash="#"+timeStr;
     };
-    var setStopTimeAndStatusAndURL = function (timeValue) {
-        refreshStopTimeAndStatus(getValidatedTime(timeValue));
-        changeURL(stopTime);
+    var setStopTimeAndStatusAndURLSE = function (timeValue) {
+        var validTimeStr = timeString.getValidatedTime(timeValue);
+        stopTime = timeString.toFullTimeStr(validTimeStr);
+        refreshStopTimeAndStatus(stopTime);
+        changeURL(validTimeStr);
     };
     $('button#set').click(function(){
-        setStopTimeAndStatusAndURL($('input#stop-minutes').val());
+        // stopTime = timeString.toFullTimeStr();
+        setStopTimeAndStatusAndURLSE($('input#stop-minutes').val());
     });
     $('button.short-key').click(function(){
-        setStopTimeAndStatusAndURL($(this).val());
+        // stopTime = timeString.toFullTimeStr($(this).val());
+        setStopTimeAndStatusAndURLSE($(this).val());
     });
     $('button#test').click(function(){
         urlPath = "file://localhost/Users/Colin/work/notes/codes/js/stopwatch/count_down.html#0100";
@@ -473,9 +400,9 @@ colinM.tomatoClock.clientDb.changes = (function () {
         generateTcKey = colinM.tomatoClock.clientDb.generateTcKey
         parseInt10 = colinM.commons.parseInt10;
 
-    self.deleteSmallSpan = function (spanThreshold) {
+    self.deleteLittleSpan = function (spanThresholdSeconds) {
         var deleteList = _.map(getTcListLatest(), function (curTc) {
-            if(parseInt10(curTc['passedSeconds']) < spanThreshold){
+            if(parseInt10(curTc['passedSeconds']) < spanThresholdSeconds){
                 return deleteTc(curTc);
             };
             return false;
@@ -487,6 +414,7 @@ colinM.tomatoClock.clientDb.changes = (function () {
 
     return self;
 }());
+var deleteLittleSpan = colinM.tomatoClock.clientDb.changes.deleteLittleSpan;
 
 $(function(){
     colinM.tomatoClock.main();
