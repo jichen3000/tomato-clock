@@ -77,3 +77,31 @@ colinM.littleAop = (function () {
     return self;
 }());
 
+colinM.commons.regularRefresh = (function () {
+    var intervalFun,
+        funList = [],
+        latestRefreshTime = new Date(),
+        self = {};
+    var invokeFunList = function () {
+        var now = new Date();
+        var that = this;
+        _.each(funList, function (curFun) {
+            return curFun.call(that, latestRefreshTime);
+        });
+        latestRefreshTime = now;
+        return latestRefreshTime;
+    };
+    self.register = function (fun) {
+        return funList.push(fun);
+    };
+    self.start = function (intervalSeconds) {
+        intervalFun = setInterval(invokeFunList, intervalSeconds*1000);
+        return self;
+    };
+    self.stop = function () {
+        clearInterval(intervalFun);
+    };
+
+    return self;
+}());
+

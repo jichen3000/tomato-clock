@@ -1,14 +1,15 @@
 tomorrow:
-  ☐ check before 'set'
   ☐ auto save record when online
+  ☐ refresh date everyday
   ☐ create a server
   ☐ store user
-  ☐ store every record
   ☐ set record type
 
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ check before 'set' @done (13-04-22 16:08)
+ ✔ store every record @done (13-04-22 16:08)
  ✔ html5 offline store test @done (13-03-31 17:36)
  ✘ useing event @cancelled (13-03-31 17:34)
  ✔ refactor using js namespaces @done (13-03-29 21:45)
