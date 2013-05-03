@@ -392,7 +392,7 @@ colinM.tomatoClock.clientDb = (function () {
         console.log("refreshHumanReadTime: "+now);
     };
     tomatoClock.after('endEvent', function () {
-        var curTc = saveOneTc(colinM.timedown.getPassedSeconds());
+        var curTc = saveOneTc(colinM.timedown.getReasonablePassedSeconds());
         renderOneTc(curTc, 'prepend');
         keepFixTcCount(5, 'prepend');
     });

@@ -42,6 +42,12 @@ colinM.timedown = (function () {
     self.getPassedSeconds = function () {
         return Math.round(this.getPassedMilliSeconds()/1000);
     };
+    self.getReasonablePassedSeconds = function () {
+        if(status==="stopped"){
+            return totalSeconds;
+        };
+        return this.getPassedSeconds();
+    }
     self.getRemainedMilliSeconds = function () {
         return this.getTotalMilliSeconds() - this.getPassedMilliSeconds();
     };
