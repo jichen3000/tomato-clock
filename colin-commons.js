@@ -95,7 +95,8 @@ colinM.commons.regularRefresh = (function () {
         return funList.push(fun);
     };
     self.start = function (intervalSeconds) {
-        intervalFun = setInterval(invokeFunList, intervalSeconds*1000);
+        // intervalFun = setInterval(invokeFunList, intervalSeconds*1000);
+        intervalFun = colinM.timer.interval(invokeFunList, intervalSeconds*1000);
         return self;
     };
     self.stop = function () {

@@ -1,0 +1,124 @@
+<!DOCTYPE html> 
+<html> 
+<body> 
+
+    <button onclick="startDown()" type="button">Play Down</button>
+    <button onclick="pauseDown()" type="button">Pause Down</button> 
+    <button onclick="playVid()" type="button">playVid</button> 
+    <button onclick="startMove()" type="button">startMove</button> 
+    <button onclick="stopMove()" type="button">stopMove</button> 
+    <br> 
+
+    <script src="../timer.js"></script>
+    <script> 
+    var myAudio=new Audio("../exclamation.mp3");
+    var putMsg=function(msg){
+        document.getElementById("msg").innerHTML += msg;
+        document.getElementById("msg").innerHTML += "<br>";
+
+    }
+    function playVid(isVeryDelay)
+    { 
+        putMsg("played!!");
+        putMsg(isVeryDelay);
+        putMsg(new Date());
+        if (!isVeryDelay){
+            myAudio.loop=true;
+            myAudio.play(); 
+            setTimeout(function () {
+                //alert("This code will run last, after a 5 second delay")
+                myAudio.pause();
+            }, 2000);
+        }
+    } 
+
+    function pauseVid()
+    { 
+      myAudio.pause(); 
+    }
+    // var rtimeOut=function(callback,delay){
+    //  var dateNow=Date.now,
+    //      requestAnimation=window.requestAnimationFrame,
+    //      start=dateNow(),
+    //      stop,
+    //      timeoutFunc=function(){
+    //         // console.log(dateNow());
+    //         var isVeryDelay = (dateNow()-start) > (delay + 10000);
+    //         dateNow()-start<delay?stop||requestAnimation(timeoutFunc):callback(isVeryDelay)
+    //       // dateNow()-start<delay?stop||requestAnimation(timeoutFunc):callback()
+    //      };
+    //  requestAnimation(timeoutFunc);
+    //  return{
+    //   clear:function(){stop=1}
+    //  }
+    // }
+    // window.rInterval=function(callback,delay){
+    //  var dateNow=Date.now,
+    //      requestAnimation=window.requestAnimationFrame,
+    //      start=dateNow(),
+    //      stop,
+    //      intervalFunc=function(){
+    //       dateNow()-start<delay||(start+=delay,callback());
+    //       stop||requestAnimation(intervalFunc)
+    //      }
+    //  requestAnimation(intervalFunc);
+    //  return{
+    //   clear:function(){stop=1}
+    //  }
+    // }
+    var timeout_obj;
+    function startDown(){
+        var timeout = getInputSeconds(),
+            now = new Date();
+        putMsg("Now:"+now);
+        colinM.timer.setVeryDelay(5000);
+        timeout_obj = colinM.timer.timeout(playVid, timeout*1000);
+        now.setSeconds(now.getSeconds()+timeout)
+        putMsg("Then:"+now);
+        putMsg(timeout+" seconds");
+    }
+    function getInputSeconds(){
+        var min_value = document.getElementById("mins").value;
+        var int_value = parseInt(min_value);
+        var seconds = int_value*60;
+        if (min_value.includes('sec')){
+            seconds = int_value;
+        }
+        return seconds;
+    }
+    function pauseDown(){
+        putMsg("pauseDown");
+        timeout_obj.clear();
+    }
+    var continueMove = true;
+    function startMove(){
+        var start = null;
+        var element = document.getElementById("move");
+        element.style.position = 'absolute';
+        continueMove = true;
+
+        function step(timestamp) {
+          if (!start) start = timestamp;
+          var progress = timestamp - start;
+          element.style.left = Math.min(progress/10, 200) + "px";
+          if (progress < 2000 && continueMove) {
+            window.requestAnimationFrame(step);
+          }
+        }
+        window.requestAnimationFrame(step);
+    }
+    function stopMove(){
+        continueMove = false;
+    }
+
+    </script> 
+    <input type="text" id="mins" value="2 sec">
+    <div id='msg'></div>
+    <div id="move" style="border-style: solid; border-color: red; width: 50px; height: 50px">
+        mm
+    </div>
+
+</body> 
+</html>
+
+

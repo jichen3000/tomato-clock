@@ -1,0 +1,45 @@
+<!DOCTYPE html> 
+<html> 
+<body> 
+
+    <button onclick="startDown()" type="button">Play Down</button>
+    <button onclick="pauseDown()" type="button">Pause Down</button> 
+    <br> 
+
+    <script> 
+    var myAudio=new Audio("../exclamation.mp3");
+    var putMsg=function(msg){
+        document.getElementById("msg").innerHTML += msg;
+        document.getElementById("msg").innerHTML += "<br>";
+
+    }
+    function playVid()
+    { 
+        myAudio.loop=true;
+        myAudio.play(); 
+        setTimeout(function () {
+            //alert("This code will run last, after a 5 second delay")
+            myAudio.pause();
+        }, 2000);
+    } 
+
+    function pauseVid()
+    { 
+        myAudio.pause(); 
+    }
+    function pauseDown(){
+        putMsg(new Date());
+    }
+    function startDown(){
+        var timeout = 5
+        setTimeout(playVid, timeout * 1000);
+        document.getElementById("show1").innerHTML = new Date();
+        document.getElementById("show2").innerHTML = timeout+" seconds";
+    }
+    </script> 
+    <div id='msg'></div>
+
+</body> 
+</html>
+
+

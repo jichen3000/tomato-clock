@@ -143,9 +143,12 @@ colinM.tomatoClock = (function () {
     var playAlarmEvents = function (playSeconds) {
         playAlarmAudio();
         playAlarmAnimation();
-        setTimeout(function () {
+        colinM.timer.timeout(function () {
             stopAlarmEvents();
         },playSeconds*1000);
+        // setTimeout(function () {
+        //     stopAlarmEvents();
+        // },playSeconds*1000);
     };
     var stopAlarmEvents = function () {
         stopAlarmAudio();
@@ -178,10 +181,12 @@ colinM.tomatoClock = (function () {
         showStopTime(timeStr);
         self.p("refreshStopTimeAndStatus:"+timeString.toSeconds(timeStr));
     };
-    self.endEvent = function () {
+    self.endEvent = function (isVeryDelay) {
         setMilliSecondsAnimationPlayState("paused");
         ShowButtonsInStopped();
-        playAlarmEvents(alarmSeconds);
+        if (!isVeryDelay){
+            playAlarmEvents(alarmSeconds);
+        }
         refreshStopTimeAndStatus(stopTime);
         self.p("end! seconds:"+timedown.getPassedSeconds());
     };

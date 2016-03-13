@@ -70,7 +70,8 @@ colinM.timedown = (function () {
             this.init(arguments[0],arguments[1]);
         };
         startTimeList.push(nowTime());
-        timeout = setTimeout(stopFun, this.getTotalMilliSeconds());
+        // timeout = setTimeout(stopFun, this.getTotalMilliSeconds());
+        timeout = colinM.timer.timeout(stopFun, this.getTotalMilliSeconds());
         status = "running";
         return this;
     };
@@ -82,7 +83,8 @@ colinM.timedown = (function () {
     };
     self.continue = function () {
         startTimeList.push(nowTime());
-        timeout = setTimeout(stopFun, this.getRemainedMilliSeconds());
+        // timeout = setTimeout(stopFun, this.getRemainedMilliSeconds());
+        timeout = colinM.timer.timeout(stopFun, this.getRemainedMilliSeconds());
         status = "running";
         return this;
     };
