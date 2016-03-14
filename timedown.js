@@ -77,7 +77,8 @@ colinM.timedown = (function () {
     };
     self.pause = function () {
         pauseTimeList.push(nowTime());
-        clearTimeout(timeout);
+        // clearTimeout(timeout);
+        timeout.clear();
         status = "paused";
         return this;
     };

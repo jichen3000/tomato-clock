@@ -100,7 +100,8 @@ colinM.commons.regularRefresh = (function () {
         return self;
     };
     self.stop = function () {
-        clearInterval(intervalFun);
+        // clearInterval(intervalFun);
+        intervalFun.clear();
     };
 
     return self;
