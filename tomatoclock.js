@@ -94,8 +94,12 @@ colinM.tomatoClock = (function () {
     var pl = function (str) {
         console.log(str);
     };
+    self.timedown = function(){
+        return timedown;
+    }
     self.p = function (msg){
-      $("p#messages").text(msg);
+        $("p#messages")[0].innerHTML += "<br>" + msg;
+        // $("p#messages").text($("p#messages").text()+"\n"+msg);
     };    
     self.test = function () {
         pl("test".repeat(5));  
@@ -181,9 +185,11 @@ colinM.tomatoClock = (function () {
         showStopTime(timeStr);
         self.p("refreshStopTimeAndStatus:"+timeString.toSeconds(timeStr));
     };
-    self.endEvent = function (isVeryDelay) {
+    self.endEvent = function () {
         setMilliSecondsAnimationPlayState("paused");
         ShowButtonsInStopped();
+        var isVeryDelay = timedown.getPassedDifferenceMilliSeconds() > 3000;
+        // self.p("isVeryDelay:"+isVeryDelay);
         if (!isVeryDelay){
             playAlarmEvents(alarmSeconds);
         }
@@ -204,7 +210,7 @@ colinM.tomatoClock = (function () {
     miliSecondsEL.on('webkitAnimationIteration', function(e) {
         showStopTime(timeString.fromSeconds(timedown.getRemainedOneSeconds()));
         // for test
-        self.p("passedSeconds:"+timedown.getPassedSeconds());
+        // self.p("passedSeconds:"+timedown.getPassedSeconds());
     });
     startEl.click(function () {
         stopAlarmEvents();
@@ -330,7 +336,10 @@ colinM.tomatoClock.clientDb = (function () {
         return keyFields[3];
     };
     var saveOneTc = function (passedSeconds, originalSeconds) {
-        var curId = getNowInt();
+        // var curId = getNowInt();
+        var curId = getNowInt() - colinM.timedown.getPassedDifferenceMilliSeconds();
+        // tomatoClock.p("curId:"+curId);
+        // tomatoClock.p("difference:"+colinM.timedown.getPassedDifferenceMilliSeconds());
         localStorage[generateTcKey(curId, "updateTimeInt")] = curId;
         localStorage[generateTcKey(curId, "passedSeconds")] = passedSeconds;
         originalSeconds && (localStorage[generateTcKey(curId, "originalSeconds")] = originalSeconds);

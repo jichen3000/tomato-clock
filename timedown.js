@@ -94,6 +94,20 @@ colinM.timedown = (function () {
         status = "stopped";
         return this;
     };
+    self.getStartTime = function() {
+        return startTimeList[0];
+    };
+    self.getPassedDifferenceMilliSeconds = function(){
+        // sometimes, the real end time will be delay, since save power.
+        // so in this case the difference could be very large
+        return self.getPassedMilliSeconds() - self.getTotalMilliSeconds();
+    }
+    // self.startTimeList = function() {
+    //     return startTimeList;
+    // }
+    // self.pauseTimeList = function() {
+    //     return pauseTimeList;
+    // }
     self.toString = function () {
         return " status: "+ status + 
               " totalSeconds: "+ this.getTotalSeconds() +

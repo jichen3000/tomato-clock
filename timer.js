@@ -16,8 +16,9 @@ colinM.timer = (function () {
     var stop;
     // putMsg(veryDelay);
     var timeoutFunc=function(){
-      var isVeryDelay = (dateNow()-start) > (delay + veryDelay);
-      dateNow()-start<delay?stop||requestAnimation(timeoutFunc):callback(isVeryDelay)
+      // var isVeryDelay = (dateNow()-start) > (delay + veryDelay);
+      // dateNow()-start<delay?stop||requestAnimation(timeoutFunc):callback(isVeryDelay)
+      dateNow()-start<delay?stop||requestAnimation(timeoutFunc):callback()
     };
     requestAnimation(timeoutFunc);
     return { clear:function(){stop=1} }
